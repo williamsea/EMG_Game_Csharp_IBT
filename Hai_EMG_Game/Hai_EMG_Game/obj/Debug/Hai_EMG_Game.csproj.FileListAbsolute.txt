@@ -1,0 +1,9 @@
+c:\users\owner\documents\visual studio 2015\Projects\Hai_EMG_Game\Hai_EMG_Game\bin\Debug\Hai_EMG_Game.exe.config
+c:\users\owner\documents\visual studio 2015\Projects\Hai_EMG_Game\Hai_EMG_Game\bin\Debug\Hai_EMG_Game.exe
+c:\users\owner\documents\visual studio 2015\Projects\Hai_EMG_Game\Hai_EMG_Game\bin\Debug\Hai_EMG_Game.pdb
+c:\users\owner\documents\visual studio 2015\Projects\Hai_EMG_Game\Hai_EMG_Game\obj\Debug\Hai_EMG_Game.csprojResolveAssemblyReference.cache
+c:\users\owner\documents\visual studio 2015\Projects\Hai_EMG_Game\Hai_EMG_Game\obj\Debug\Hai_EMG_Game.Form1.resources
+c:\users\owner\documents\visual studio 2015\Projects\Hai_EMG_Game\Hai_EMG_Game\obj\Debug\Hai_EMG_Game.Properties.Resources.resources
+c:\users\owner\documents\visual studio 2015\Projects\Hai_EMG_Game\Hai_EMG_Game\obj\Debug\Hai_EMG_Game.csproj.GenerateResource.Cache
+c:\users\owner\documents\visual studio 2015\Projects\Hai_EMG_Game\Hai_EMG_Game\obj\Debug\Hai_EMG_Game.exe
+c:\users\owner\documents\visual studio 2015\Projects\Hai_EMG_Game\Hai_EMG_Game\obj\Debug\Hai_EMG_Game.pdb
