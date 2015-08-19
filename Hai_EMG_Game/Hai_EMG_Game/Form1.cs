@@ -19,6 +19,8 @@ namespace Hai_EMG_Game
         public MainForm()
         {
             InitializeComponent();
+            //SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+            //this.BackColor = Color.Transparent;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -44,6 +46,13 @@ namespace Hai_EMG_Game
         //Display
         int DisplayLength = 10000; //Sampling rate = 1000
         int disp;
+
+        //Target Levels
+        int elapsedTime = 0;
+        int center = 0;
+        int halfWidth = 5;
+        int timeInterval = 3;
+        int spaceInterval = 10;
 
         private void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
@@ -148,7 +157,17 @@ namespace Hai_EMG_Game
             if (counter > 1)
             {
                 this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
-                this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Strength", digitizedEnvelop[counter - 1]); //Note that counter++ after putting in data. So we need counter - 1 here!!!
+                this.chart_DigitBar.Series["targetLevel"].Points.Clear();
+                this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Strength", 0, digitizedEnvelop[counter - 1]); //Note that counter++ after putting in data. So we need counter - 1 here!!!
+                this.chart_DigitBar.Series["BarEMGVal"]["DrawSideBySide"] = "false"; //Overlap two series
+                this.chart_DigitBar.Series[0].Color = Color.FromArgb(255, 255, 0, 0); //Set color and transparency
+                this.chart_DigitBar.Series["targetLevel"].Points.AddXY("Strength", center - halfWidth, center + halfWidth);
+                this.chart_DigitBar.Series["targetLevel"]["DrawSideBySide"] = "false";
+                this.chart_DigitBar.Series[1].Color = Color.FromArgb(128, 0, 255, 0);
+                if(center == 0)
+                {
+                    this.chart_DigitBar.Series[1].Color = Color.FromArgb(128, 0, 0, 255);
+                }
             }
 
 
@@ -178,21 +197,56 @@ namespace Hai_EMG_Game
             label_trackBar.Text = "Display Length: " + (trackBar_displayLength.Value / 1000).ToString() + " s";
         }
 
+        private void timer_targetLevel_Tick(object sender, EventArgs e)
+        {
+            elapsedTime++;
+            if(elapsedTime % timeInterval == 0) // update every timeInterval second
+            {
+                center += spaceInterval;
+            }
+
+            if(center > 77)
+            {
+                timer_targetLevel.Enabled = false;
+                center = 0;
+                MessageBox.Show("Game Finished!");
+            }
+
+        }
+
+        private void button_StartGame_Click(object sender, EventArgs e)
+        {
+            timer_targetLevel.Enabled = true;
+            center = 0;
+        }
+
+
+
+
+
         //Test button and timer for debugging
         private void buttonTest_Click(object sender, EventArgs e)
         {
-            this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
-            this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Halo", 100);
-            timerTest.Enabled = true;
+            //this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
+            //this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Halo", 100);
+            //timerTest.Enabled = true;
+
+            //this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
+            //this.chart_DigitBar.Series["targetLevel"].Points.Clear();
+            //this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Strength", 0,70);
+            //this.chart_DigitBar.Series["BarEMGVal"]["DrawSideBySide"] = "false";
+            //this.chart_DigitBar.Series[0].Color = Color.FromArgb(128, 255, 0, 0);
+            //this.chart_DigitBar.Series["targetLevel"].Points.AddXY("Strength", 30,50); //Note that counter++ after putting in data. So we need counter - 1 here!!!
+            //this.chart_DigitBar.Series["targetLevel"]["DrawSideBySide"] = "false";
+            //this.chart_DigitBar.Series[1].Color = Color.FromArgb(128, 0, 255, 0);
+
         }
 
         private void timerTest_Tick(object sender, EventArgs e)
         {
-            disp++;
-            this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
-            this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Halo", disp);
+            //disp++;
+            //this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
+            //this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Halo", disp);
         }
-
-
     }
 }
