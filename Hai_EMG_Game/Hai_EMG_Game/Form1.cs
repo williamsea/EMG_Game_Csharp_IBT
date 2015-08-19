@@ -16,18 +16,6 @@ namespace Hai_EMG_Game
 {
     public partial class MainForm : Form
     {
-        public MainForm()
-        {
-            InitializeComponent();
-            //SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-            //this.BackColor = Color.Transparent;
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
         //Data Acquisition and Bit Manipulation
         int counter = 0;
         int[] receivedBuffer = new int[500];
@@ -40,12 +28,13 @@ namespace Hai_EMG_Game
         int[] DACenvelop = new int[1000000];
         int[] digitizedEnvelop = new int[1000000];
         int signalPeak = 800;
-        double stepSize = 255 / 77; //0-255, digitizedLevel = 77;
+        double stepSize = 256.0 / 77.0; //0-255, digitizedLevel = 77; NOTE: Must add XX.0 to ensure double accuracy. Otherwise 256/77=3.
         Encoding enc = Encoding.GetEncoding(1252);
 
         //Display
         int DisplayLength = 10000; //Sampling rate = 1000
         int disp;
+        Boolean showDigitized = false;
 
         //Target Levels
         int elapsedTime = 0;
@@ -57,6 +46,21 @@ namespace Hai_EMG_Game
         Boolean hitCountsRefresh = false;
         double hitThreshold = 0.001; // hitThreshold of timeInterval in target area means really hit
         Boolean isGameStart = false;
+        int totalHits = 0;
+        Boolean totalHitsCounted = false;
+        int totalTrials = 0;
+
+        public MainForm()
+        {
+            InitializeComponent();
+            //SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+            //this.BackColor = Color.Transparent;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
 
         private void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
@@ -173,46 +177,83 @@ namespace Hai_EMG_Game
                     }
                 }
 
-
                 this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
                 this.chart_DigitBar.Series["targetLevel"].Points.Clear();
 
                 this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Strength", 0, digitizedEnvelop[counter - 1]); //Note that counter++ after putting in data. So we need counter - 1 here!!!
                 this.chart_DigitBar.Series["BarEMGVal"]["DrawSideBySide"] = "false"; //Overlap two series
                 this.chart_DigitBar.Series[0].Color = Color.FromArgb(200, 255, 0, 0); //Set color and transparency //Red
+                this.chart_DigitBar.Series[0].BorderColor = Color.FromArgb(200, 0, 0, 128); //Navy
 
                 this.chart_DigitBar.Series["targetLevel"].Points.AddXY("Strength", center - halfWidth, center + halfWidth);
                 this.chart_DigitBar.Series["targetLevel"]["DrawSideBySide"] = "false";
                 this.chart_DigitBar.Series[1].Color = Color.FromArgb(200, 255, 215, 0); //Gold
+                this.chart_DigitBar.Series[1].BorderColor = Color.FromArgb(200, 184, 131, 11); //Dark Gold
+                this.chart_DigitBar.Series[1].BorderWidth = 5;
+
                 //this.chart_DigitBar.Refresh();
-                if(hitCounts > timeInterval * 1000 * hitThreshold)
+                if (hitCounts > timeInterval * 1000 * hitThreshold)
                 {
                     this.chart_DigitBar.Series[1].Color = Color.FromArgb(200, 0, 255, 0); //Green
+                    this.chart_DigitBar.Series[1].BorderColor = Color.FromArgb(200, 0, 100, 0); //Dark Green
+                    this.chart_DigitBar.Series[1].BorderWidth = 5;
+
+                    if (!totalHitsCounted)
+                    {
+                        totalHits++;
+                        totalHitsCounted = true;
+                    }
+                    
                 }
 
                 if(center == 0)
                 {
                     this.chart_DigitBar.Series[1].Color = Color.FromArgb(0, 0, 0, 0); //Disappear
+                    this.chart_DigitBar.Series[1].BorderWidth = 0;
                 }
             }
 
 
             this.chart_EMGrealtime.Series["EMGVal"].Points.Clear();
-            //this.chart_digitEMG.Series["digitEMGVal"].Points.Clear();
             if (counter >= DisplayLength)
             {
                 for (disp = counter - DisplayLength; disp < counter; disp++)
                 {
-                    this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), envelop[disp]);
-                    //this.chart_digitEMG.Series["digitEMGVal"].Points.AddXY((disp / 1000).ToString(), digitizedEnvelop[disp]);
+                    if (!showDigitized)
+                    {
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = Double.NaN; //Default AutoScale
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = Double.NaN;
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = Double.NaN;
+                        this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), envelop[disp]);
+                    }
+                    else
+                    {
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
+                        this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), digitizedEnvelop[disp]);
+
+                    }
                 }
             }
             else
             {
                 for (disp = 0; disp < DisplayLength; disp++)
                 {
-                    this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), envelop[disp]);
-                    //this.chart_digitEMG.Series["digitEMGVal"].Points.AddXY((disp / 1000).ToString(), digitizedEnvelop[disp]);
+                    if (!showDigitized)
+                    {
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = Double.NaN;//Default AutoScale
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = Double.NaN;
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = Double.NaN;
+                        this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), envelop[disp]);
+                    }
+                    else
+                    {
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
+                        this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), digitizedEnvelop[disp]);
+                    }
                 }
             }
         }
@@ -229,14 +270,16 @@ namespace Hai_EMG_Game
             if(elapsedTime % timeInterval == 0) // update every timeInterval second
             {
                 center += spaceInterval;
+                totalTrials++;
                 hitCountsRefresh = true;
+                totalHitsCounted = false;
             }
 
             if(center > 77)
             {
                 timer_targetLevel.Enabled = false;
                 center = 0;
-                MessageBox.Show("Game Finished!");
+                MessageBox.Show("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" );
                 isGameStart = false;
             }
 
@@ -244,9 +287,11 @@ namespace Hai_EMG_Game
 
         private void button_StartGame_Click(object sender, EventArgs e)
         {
+            totalHits = 0;
+            totalTrials = 0; //Already including the initial one, since it actually counts from 10, 20, ... 80 to get stopped, but the real number should be 7 (10-70).
             isGameStart = true;
             timer_targetLevel.Enabled = true;
-            center = 0;
+            center = spaceInterval;
         }
 
 
@@ -276,6 +321,19 @@ namespace Hai_EMG_Game
             //disp++;
             //this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
             //this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Halo", disp);
+        }
+
+        private void button_switchGraph_Click(object sender, EventArgs e)
+        {
+            showDigitized = !showDigitized;
+            if (showDigitized)
+            {
+                button_switchGraph.Text = "Show Filtered EMG Signal";
+            }
+            else
+            {
+                button_switchGraph.Text = "Show Digitalized EMG Envelopl";
+            }
         }
     }
 }
