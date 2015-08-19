@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title1 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title3 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title4 = new System.Windows.Forms.DataVisualization.Charting.Title();
             this.serialPort = new System.IO.Ports.SerialPort(this.components);
             this.button_startDisplay = new System.Windows.Forms.Button();
             this.timer_display = new System.Windows.Forms.Timer(this.components);
@@ -45,7 +45,6 @@
             this.timerTest = new System.Windows.Forms.Timer(this.components);
             this.trackBar_displayLength = new System.Windows.Forms.TrackBar();
             this.label_trackBar = new System.Windows.Forms.Label();
-            this.textBox_transparentBar = new System.Windows.Forms.TextBox();
             this.timer_targetLevel = new System.Windows.Forms.Timer(this.components);
             this.button_StartGame = new System.Windows.Forms.Button();
             this.button_switchGraph = new System.Windows.Forms.Button();
@@ -78,53 +77,53 @@
             // 
             // chart_EMGrealtime
             // 
-            chartArea1.BorderWidth = 2;
-            chartArea1.CursorX.IsUserSelectionEnabled = true;
-            chartArea1.Name = "ChartArea1";
-            this.chart_EMGrealtime.ChartAreas.Add(chartArea1);
+            chartArea3.BorderWidth = 2;
+            chartArea3.CursorX.IsUserSelectionEnabled = true;
+            chartArea3.Name = "ChartArea1";
+            this.chart_EMGrealtime.ChartAreas.Add(chartArea3);
             this.chart_EMGrealtime.Location = new System.Drawing.Point(252, 3);
             this.chart_EMGrealtime.Name = "chart_EMGrealtime";
-            series1.BorderWidth = 3;
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series1.Name = "EMGVal";
-            this.chart_EMGrealtime.Series.Add(series1);
+            series4.BorderWidth = 3;
+            series4.ChartArea = "ChartArea1";
+            series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series4.Name = "EMGVal";
+            this.chart_EMGrealtime.Series.Add(series4);
             this.chart_EMGrealtime.Size = new System.Drawing.Size(825, 702);
             this.chart_EMGrealtime.TabIndex = 3;
             this.chart_EMGrealtime.Text = "chart1";
-            title1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            title1.Name = "EMG Envelop";
-            title1.Text = "EMG Envelop";
-            this.chart_EMGrealtime.Titles.Add(title1);
+            title3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            title3.Name = "EMG_Envelop";
+            title3.Text = "EMG Envelop";
+            this.chart_EMGrealtime.Titles.Add(title3);
             // 
             // chart_DigitBar
             // 
-            chartArea2.AxisY.Interval = 10D;
-            chartArea2.AxisY.Maximum = 80D;
-            chartArea2.AxisY.Minimum = 0D;
-            chartArea2.BorderWidth = 2;
-            chartArea2.CursorX.IsUserSelectionEnabled = true;
-            chartArea2.Name = "ChartArea1";
-            this.chart_DigitBar.ChartAreas.Add(chartArea2);
+            chartArea4.AxisY.Interval = 10D;
+            chartArea4.AxisY.Maximum = 80D;
+            chartArea4.AxisY.Minimum = 0D;
+            chartArea4.BorderWidth = 2;
+            chartArea4.CursorX.IsUserSelectionEnabled = true;
+            chartArea4.Name = "ChartArea1";
+            this.chart_DigitBar.ChartAreas.Add(chartArea4);
             this.chart_DigitBar.Location = new System.Drawing.Point(1083, 3);
             this.chart_DigitBar.Name = "chart_DigitBar";
-            series2.BorderWidth = 5;
-            series2.ChartArea = "ChartArea1";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeColumn;
-            series2.Name = "BarEMGVal";
-            series2.YValuesPerPoint = 2;
-            series3.ChartArea = "ChartArea1";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeColumn;
-            series3.Name = "targetLevel";
-            series3.YValuesPerPoint = 2;
-            this.chart_DigitBar.Series.Add(series2);
-            this.chart_DigitBar.Series.Add(series3);
+            series5.BorderWidth = 5;
+            series5.ChartArea = "ChartArea1";
+            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeColumn;
+            series5.Name = "BarEMGVal";
+            series5.YValuesPerPoint = 2;
+            series6.ChartArea = "ChartArea1";
+            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeColumn;
+            series6.Name = "targetLevel";
+            series6.YValuesPerPoint = 2;
+            this.chart_DigitBar.Series.Add(series5);
+            this.chart_DigitBar.Series.Add(series6);
             this.chart_DigitBar.Size = new System.Drawing.Size(328, 702);
             this.chart_DigitBar.TabIndex = 5;
-            title2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            title2.Name = "Real Time Bar";
-            title2.Text = "Real Time Bar";
-            this.chart_DigitBar.Titles.Add(title2);
+            title4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            title4.Name = "Real Time Bar";
+            title4.Text = "Real Time Bar";
+            this.chart_DigitBar.Titles.Add(title4);
             // 
             // buttonTest
             // 
@@ -161,13 +160,6 @@
             this.label_trackBar.TabIndex = 9;
             this.label_trackBar.Text = "Select Display Length From 1s to 10s";
             // 
-            // textBox_transparentBar
-            // 
-            this.textBox_transparentBar.Location = new System.Drawing.Point(65, 713);
-            this.textBox_transparentBar.Name = "textBox_transparentBar";
-            this.textBox_transparentBar.Size = new System.Drawing.Size(100, 20);
-            this.textBox_transparentBar.TabIndex = 0;
-            // 
             // timer_targetLevel
             // 
             this.timer_targetLevel.Interval = 1000;
@@ -176,7 +168,7 @@
             // button_StartGame
             // 
             this.button_StartGame.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_StartGame.Location = new System.Drawing.Point(28, 452);
+            this.button_StartGame.Location = new System.Drawing.Point(141, 375);
             this.button_StartGame.Name = "button_StartGame";
             this.button_StartGame.Size = new System.Drawing.Size(89, 50);
             this.button_StartGame.TabIndex = 10;
@@ -202,7 +194,6 @@
             this.ClientSize = new System.Drawing.Size(1474, 740);
             this.Controls.Add(this.button_switchGraph);
             this.Controls.Add(this.button_StartGame);
-            this.Controls.Add(this.textBox_transparentBar);
             this.Controls.Add(this.label_trackBar);
             this.Controls.Add(this.trackBar_displayLength);
             this.Controls.Add(this.buttonTest);
@@ -231,7 +222,6 @@
         private System.Windows.Forms.Timer timerTest;
         private System.Windows.Forms.TrackBar trackBar_displayLength;
         private System.Windows.Forms.Label label_trackBar;
-        private System.Windows.Forms.TextBox textBox_transparentBar;
         private System.Windows.Forms.Timer timer_targetLevel;
         private System.Windows.Forms.Button button_StartGame;
         private System.Windows.Forms.Button button_switchGraph;

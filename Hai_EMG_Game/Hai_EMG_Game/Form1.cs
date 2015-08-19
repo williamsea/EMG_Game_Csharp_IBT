@@ -224,6 +224,7 @@ namespace Hai_EMG_Game
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = Double.NaN; //Default AutoScale
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = Double.NaN;
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = Double.NaN;
+                        this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Filtered EMG Signal";
                         this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), envelop[disp]);
                     }
                     else
@@ -231,6 +232,7 @@ namespace Hai_EMG_Game
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
+                        this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-77)";
                         this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), digitizedEnvelop[disp]);
 
                     }
@@ -245,6 +247,7 @@ namespace Hai_EMG_Game
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = Double.NaN;//Default AutoScale
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = Double.NaN;
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = Double.NaN;
+                        this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Filtered EMG Signal";
                         this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), envelop[disp]);
                     }
                     else
@@ -252,6 +255,7 @@ namespace Hai_EMG_Game
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
+                        this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-77)";
                         this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), digitizedEnvelop[disp]);
                     }
                 }
