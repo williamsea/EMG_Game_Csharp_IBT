@@ -53,6 +53,10 @@ namespace Hai_EMG_Game
         int halfWidth = 5;
         int timeInterval = 3;
         int spaceInterval = 10;
+        int hitCounts = 0;
+        Boolean hitCountsRefresh = false;
+        double hitThreshold = 0.001; // hitThreshold of timeInterval in target area means really hit
+        Boolean isGameStart = false;
 
         private void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
@@ -156,17 +160,39 @@ namespace Hai_EMG_Game
 
             if (counter > 1)
             {
+                if (isGameStart && center != 0)
+                {
+                    if (hitCountsRefresh) //Every time the target area updated, refresh the hitCounts.
+                    {
+                        hitCounts = 0;
+                        hitCountsRefresh = false;
+                    }
+                    if (digitizedEnvelop[counter - 1] > center - halfWidth && digitizedEnvelop[counter - 1] < center + halfWidth)
+                    {
+                        hitCounts++; //Count the accumulated time in the target area
+                    }
+                }
+
+
                 this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
                 this.chart_DigitBar.Series["targetLevel"].Points.Clear();
+
                 this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Strength", 0, digitizedEnvelop[counter - 1]); //Note that counter++ after putting in data. So we need counter - 1 here!!!
                 this.chart_DigitBar.Series["BarEMGVal"]["DrawSideBySide"] = "false"; //Overlap two series
-                this.chart_DigitBar.Series[0].Color = Color.FromArgb(255, 255, 0, 0); //Set color and transparency
+                this.chart_DigitBar.Series[0].Color = Color.FromArgb(200, 255, 0, 0); //Set color and transparency //Red
+
                 this.chart_DigitBar.Series["targetLevel"].Points.AddXY("Strength", center - halfWidth, center + halfWidth);
                 this.chart_DigitBar.Series["targetLevel"]["DrawSideBySide"] = "false";
-                this.chart_DigitBar.Series[1].Color = Color.FromArgb(128, 0, 255, 0);
+                this.chart_DigitBar.Series[1].Color = Color.FromArgb(200, 255, 215, 0); //Gold
+                //this.chart_DigitBar.Refresh();
+                if(hitCounts > timeInterval * 1000 * hitThreshold)
+                {
+                    this.chart_DigitBar.Series[1].Color = Color.FromArgb(200, 0, 255, 0); //Green
+                }
+
                 if(center == 0)
                 {
-                    this.chart_DigitBar.Series[1].Color = Color.FromArgb(128, 0, 0, 255);
+                    this.chart_DigitBar.Series[1].Color = Color.FromArgb(0, 0, 0, 0); //Disappear
                 }
             }
 
@@ -203,6 +229,7 @@ namespace Hai_EMG_Game
             if(elapsedTime % timeInterval == 0) // update every timeInterval second
             {
                 center += spaceInterval;
+                hitCountsRefresh = true;
             }
 
             if(center > 77)
@@ -210,12 +237,14 @@ namespace Hai_EMG_Game
                 timer_targetLevel.Enabled = false;
                 center = 0;
                 MessageBox.Show("Game Finished!");
+                isGameStart = false;
             }
 
         }
 
         private void button_StartGame_Click(object sender, EventArgs e)
         {
+            isGameStart = true;
             timer_targetLevel.Enabled = true;
             center = 0;
         }
