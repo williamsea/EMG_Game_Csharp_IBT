@@ -14,9 +14,9 @@ Author: Hai Tang (haitang@jhu.edu)
 */
 namespace Hai_EMG_Game
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
         }
@@ -47,10 +47,13 @@ namespace Hai_EMG_Game
 
         private void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
+            
             for (int i = 0; i < receivedBuffer.Length; i++)
             {
-                receivedBuffer[i] = serialPort.ReadByte();
-                //Read a byte from the stream and advances the position within the stream by one byte, or returns -1 if at the end of the stream.
+                if (serialPort.IsOpen)
+                {
+                    receivedBuffer[i] = serialPort.ReadByte();//Read a byte from the stream and advances the position within the stream by one byte, or returns -1 if at the end of the stream.
+                }
             }
 
             for (int i = 0; i <= receivedBuffer.Length - 5; i++)
@@ -145,16 +148,18 @@ namespace Hai_EMG_Game
             if (counter > 1)
             {
                 this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
-                this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Strength", digitizedEnvelop[counter-1]); //Note that counter++ after putting in data. So we need counter - 1 here!!!
+                this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Strength", digitizedEnvelop[counter - 1]); //Note that counter++ after putting in data. So we need counter - 1 here!!!
             }
 
 
             this.chart_EMGrealtime.Series["EMGVal"].Points.Clear();
+            //this.chart_digitEMG.Series["digitEMGVal"].Points.Clear();
             if (counter >= DisplayLength)
             {
                 for (disp = counter - DisplayLength; disp < counter; disp++)
                 {
                     this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), envelop[disp]);
+                    //this.chart_digitEMG.Series["digitEMGVal"].Points.AddXY((disp / 1000).ToString(), digitizedEnvelop[disp]);
                 }
             }
             else
@@ -162,11 +167,16 @@ namespace Hai_EMG_Game
                 for (disp = 0; disp < DisplayLength; disp++)
                 {
                     this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), envelop[disp]);
+                    //this.chart_digitEMG.Series["digitEMGVal"].Points.AddXY((disp / 1000).ToString(), digitizedEnvelop[disp]);
                 }
             }
         }
 
-
+        private void trackBar_displayLength_Scroll(object sender, EventArgs e)
+        {
+            DisplayLength = trackBar_displayLength.Value;
+            label_trackBar.Text = "Display Length: " + (trackBar_displayLength.Value / 1000).ToString() + " s";
+        }
 
         //Test button and timer for debugging
         private void buttonTest_Click(object sender, EventArgs e)
@@ -182,5 +192,7 @@ namespace Hai_EMG_Game
             this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
             this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Halo", disp);
         }
+
+
     }
 }
