@@ -26,11 +26,15 @@ namespace Hai_EMG_Game
         int combine;
         bool sign = false;
         int[] envelop = new int[1000000];//1000s
-        int[] DACenvelop = new int[1000000];
-        int[] digitizedEnvelop = new int[1000000];
-        int signalPeak = 800;
-        double stepSize = 256.0 / 77.0; //0-255, digitizedLevel = 77; NOTE: Must add XX.0 to ensure double accuracy. Otherwise 256/77=3.
         Encoding enc = Encoding.GetEncoding(1252);
+
+        //Version D and OB Digitization
+        int[] DACenvelop = new int[1000000];//Only for D2, 0-255
+        int[] digitizedEnvelop = new int[1000000];
+        int signalPeakD2 = 800;
+        double stepSizeD2 = 256.0 / 77.0; //0-255, digitizedLevel = 77; NOTE: Must add XX.0 to ensure double accuracy. Otherwise 256/77=3.
+        int signalPeakOB = 1024;
+        double stepSizeOB = 1024.0 / 100.0; //digitiedLevel = 100
 
         //Display
         int DisplayLength = 10000; //Sampling rate = 1000
@@ -44,6 +48,7 @@ namespace Hai_EMG_Game
         int timeInterval = 3;
         int spaceInterval = 10;
         int hitCounts = 0;
+        int peakLevel = 0;//77 for D2 and 90 for OB, i.e., 10-70 for D2 and 10-90 for OB
         Boolean hitCountsRefresh = false;
         double hitThreshold = 0.001; // hitThreshold of timeInterval in target area means really hit
         Boolean isGameStart = false;
@@ -59,6 +64,8 @@ namespace Hai_EMG_Game
         string readingPath;
         int[] savedEnvelop = new int[1000000];//1000s
         int[] savedDigitizedEnvelop = new int[1000000];
+        string electrode = "";
+        string filePath;
 
         public MainForm()
         {
@@ -68,6 +75,9 @@ namespace Hai_EMG_Game
         private void Form1_Load(object sender, EventArgs e)
         {
             button_stop_recording.Enabled = false;
+            electrode = "IBT";
+            button_IBTVD.Enabled = false;
+            button_pause.Enabled = false;
         }
 
         private void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
@@ -114,12 +124,21 @@ namespace Hai_EMG_Game
                         }
                         envelop[counter] = combine; //Take the correct negative value. Not need to take complement and plus 1 any more.
                     }
-                    DACenvelop[counter] = envelop[counter] * 255 / signalPeak;
-                    if (DACenvelop[counter] > 255)
+
+                    if(electrode == "IBT")
                     {
-                        DACenvelop[counter] = 255;
+                        DACenvelop[counter] = envelop[counter] * 255 / signalPeakD2;
+                        if (DACenvelop[counter] > 255)
+                        {
+                            DACenvelop[counter] = 255;
+                        }
+                        digitizedEnvelop[counter] = (int)(DACenvelop[counter] / stepSizeD2); //No need to floor an int since it's auto truncked.
                     }
-                    digitizedEnvelop[counter] = (int)(DACenvelop[counter] / stepSize); //No need to floor an int since it's auto truncked.
+                    else if(electrode == "OttoBock")
+                    {
+                        digitizedEnvelop[counter] = (int)(envelop[counter] / stepSizeOB);
+                    }
+
 
                     //Put the data into recording file
                     if (recording)
@@ -161,6 +180,8 @@ namespace Hai_EMG_Game
                 {
                     serialPort.Open(); 
                 }
+                button_startDisplay.Enabled = false;
+                button_pause.Enabled = true;
             }
             catch
             {
@@ -177,7 +198,7 @@ namespace Hai_EMG_Game
 
         private void DisplayData(object s, EventArgs e)
         {
-
+            //Bar Graph
             if (counter > 1)
             {
                 if (isGameStart && center != 0)
@@ -195,6 +216,21 @@ namespace Hai_EMG_Game
 
                 this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
                 this.chart_DigitBar.Series["targetLevel"].Points.Clear();
+
+                if (electrode == "IBT")
+                {
+                    this.chart_DigitBar.ChartAreas[0].AxisY.Maximum = 80;
+                    this.chart_DigitBar.ChartAreas[0].AxisY.Minimum = 0;
+                    this.chart_DigitBar.ChartAreas[0].AxisY.Interval = 10;
+                    this.chart_DigitBar.Titles["Real Time Bar"].Text = "D2 Real Time Bar (0-77)";
+                }
+                else if (electrode == "OttoBock")
+                {
+                    this.chart_DigitBar.ChartAreas[0].AxisY.Maximum = 100;
+                    this.chart_DigitBar.ChartAreas[0].AxisY.Minimum = 0;
+                    this.chart_DigitBar.ChartAreas[0].AxisY.Interval = 10;
+                    this.chart_DigitBar.Titles["Real Time Bar"].Text = "OB Real Time Bar (0-100)";
+                }
 
                 this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Strength", 0, digitizedEnvelop[counter - 1]); //Note that counter++ after putting in data. So we need counter - 1 here!!!
                 this.chart_DigitBar.Series["BarEMGVal"]["DrawSideBySide"] = "false"; //Overlap two series
@@ -228,7 +264,7 @@ namespace Hai_EMG_Game
                 }
             }
 
-
+            //Real Time EMG Graph
             this.chart_EMGrealtime.Series["EMGVal"].Points.Clear();
             if (counter >= DisplayLength)
             {
@@ -242,18 +278,28 @@ namespace Hai_EMG_Game
                         this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Filtered EMG Signal";
                         this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), envelop[disp]);
                     }
-                    else
+                    else //Show Digitized EMG
                     {
-                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
-                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
-                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
-                        this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-77)";
+                        if(electrode == "IBT")
+                        {
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
+                            this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-77)";
+                        }
+                        else if(electrode == "OttoBock")
+                        {
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 100;
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
+                            this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-100)";
+                        }
                         this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), digitizedEnvelop[disp]);
 
                     }
                 }
             }
-            else
+            else //Time elapsed less than display length
             {
                 for (disp = 0; disp < DisplayLength; disp++)
                 {
@@ -265,12 +311,22 @@ namespace Hai_EMG_Game
                         this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Filtered EMG Signal";
                         this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), envelop[disp]);
                     }
-                    else
+                    else //Show Digitized EMG
                     {
-                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
-                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
-                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
-                        this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-77)";
+                        if (electrode == "IBT")
+                        {
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
+                            this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-77)";
+                        }
+                        else if (electrode == "OttoBock")
+                        {
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 100;
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
+                            this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-100)";
+                        }
                         this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), digitizedEnvelop[disp]);
                     }
                 }
@@ -294,21 +350,35 @@ namespace Hai_EMG_Game
                 totalHitsCounted = false;
             }
 
-            if(center > 77)
+            if(electrode == "IBT")
+            {
+                peakLevel = 77;
+            }
+            else if(electrode == "OttoBock")
+            {
+                peakLevel = 90;
+            }
+
+            if(center > peakLevel)
             {
                 timer_targetLevel.Enabled = false;
                 center = 0;
                 MessageBox.Show("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" );
                 isGameStart = false;
                 button_StartGame.Enabled = true;
+                myStreamWriter.Write("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!");
                 button_stop_recording_Click(sender, e);
+                button_StartGame.BackColor = Color.Gold;
             }
 
         }
 
         private void button_StartGame_Click(object sender, EventArgs e)
         {
-            if (textBox_subjectName.Text != "" && textBox_envelopWinLen.Text!="")
+            button_start_Click(sender, e);
+            button_StartGame.BackColor = Color.Lime;
+
+            if (textBox_subjectName.Text != "")
             {
                 totalHits = 0;
                 totalTrials = 0; //Already including the initial one, since it actually counts from 10, 20, ... 80 to get stopped, but the real number should be 7 (10-70).
@@ -321,7 +391,7 @@ namespace Hai_EMG_Game
             }
             else
             {
-                MessageBox.Show("Please Enter Your Name and Envelop Window Length!");
+                MessageBox.Show("Please Enter Your Name!");
             }
         }
 
@@ -342,11 +412,24 @@ namespace Hai_EMG_Game
         {
             if (textBox_subjectName.Text != "")
             {
-                if (!Directory.Exists(savingPath + textBox_subjectName.Text))
+                
+                if (electrode == "IBT")
                 {
-                    Directory.CreateDirectory(savingPath + textBox_subjectName.Text);
+                    if (!Directory.Exists(savingPath + textBox_subjectName.Text + electrode + textBox_envelopWinLen.Text))
+                    {
+                        Directory.CreateDirectory(savingPath + textBox_subjectName.Text + electrode + textBox_envelopWinLen.Text);
+                    }
+                    filePath = savingPath + textBox_subjectName.Text + electrode + textBox_envelopWinLen.Text + "\\" + DateTime.Now.ToString("dd-mm-yyyy_hh-mm-ss") + ".txt";
                 }
-                string filePath = savingPath + textBox_subjectName.Text + textBox_envelopWinLen + "\\" + DateTime.Now.ToString("dd-mm-yyyy_hh-mm-ss") + ".txt";
+                else if(electrode == "OttoBock")
+                {
+                    if (!Directory.Exists(savingPath + textBox_subjectName.Text + electrode ))
+                    {
+                        Directory.CreateDirectory(savingPath + textBox_subjectName.Text + electrode );
+                    }
+                    filePath = savingPath + textBox_subjectName.Text + electrode + "\\" + DateTime.Now.ToString("dd-mm-yyyy_hh-mm-ss") + ".txt";
+                }
+                
                 myFileStream = new FileStream(filePath, System.IO.FileMode.Create);
                 myStreamWriter = new StreamWriter(myFileStream);
                 recording = true;
@@ -405,6 +488,7 @@ namespace Hai_EMG_Game
             int[] wholeIntArray;
             wholeString = myStreamReader.ReadToEnd();
             wholeStringArray = wholeString.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries);
+            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 10);//Remove the last 10 elements in array by resizing, which are "Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" 
             wholeIntArray = Array.ConvertAll(wholeStringArray, int.Parse);
             myStreamReader.Close();
 
@@ -451,6 +535,27 @@ namespace Hai_EMG_Game
         private void button_return_realtime_Click(object sender, EventArgs e)
         {
             timer_display.Enabled = true;
+        }
+
+        private void button_IBTVD_Click(object sender, EventArgs e)
+        {
+            electrode = "IBT";
+            button_IBTVD.Enabled = false;
+            button_OB.Enabled = true;
+        }
+
+        private void button_OB_Click(object sender, EventArgs e)
+        {
+            electrode = "OttoBock";
+            button_OB.Enabled = false;
+            button_IBTVD.Enabled = true;
+        }
+
+        private void button_pause_Click(object sender, EventArgs e)
+        {
+            timer_display.Enabled = false;
+            button_pause.Enabled = false;
+            button_startDisplay.Enabled = true;
         }
     }
 }
