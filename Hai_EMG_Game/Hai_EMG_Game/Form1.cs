@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 
 /*
@@ -50,6 +51,12 @@ namespace Hai_EMG_Game
         Boolean totalHitsCounted = false;
         int totalTrials = 0;
 
+        //Recording
+        string savingPath = "C:\\Users\\Owner\\Desktop\\Game_Data\\";
+        FileStream myFileStream;
+        StreamWriter myStreamWriter;
+        Boolean recording = false;
+
         public MainForm()
         {
             InitializeComponent();
@@ -59,7 +66,7 @@ namespace Hai_EMG_Game
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            button_stop_recording.Enabled = false;
         }
 
         private void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
@@ -112,6 +119,14 @@ namespace Hai_EMG_Game
                         DACenvelop[counter] = 255;
                     }
                     digitizedEnvelop[counter] = (int)(DACenvelop[counter] / stepSize); //No need to floor an int since it's auto truncked.
+
+                    //Put the data into recording file
+                    if (recording)
+                    {
+                        myStreamWriter.Write(counter.ToString() + '\t' + envelop[counter].ToString() + "\t" + digitizedEnvelop[counter].ToString() + "\t");
+                        myStreamWriter.WriteLine();
+                    }
+
                     counter++;
                 }
             }
@@ -338,6 +353,38 @@ namespace Hai_EMG_Game
             {
                 button_switchGraph.Text = "Show Digitalized EMG Envelopl";
             }
+        }
+
+        private void button_start_recording_Click(object sender, EventArgs e)
+        {
+            if (textBox_subjectName.Text != "")
+            {
+                if (!Directory.Exists(savingPath + textBox_subjectName.Text))
+                {
+                    Directory.CreateDirectory(savingPath + textBox_subjectName.Text);
+                }
+                string filePath = savingPath + textBox_subjectName.Text + "\\" + DateTime.Now.ToString("dd-mm-yyyy_hh-mm-ss") + ".txt";
+                myFileStream = new FileStream(filePath, System.IO.FileMode.Create);
+                myStreamWriter = new StreamWriter(myFileStream);
+                recording = true;
+
+                button_start_recording.Enabled = false;
+                button_stop_recording.Enabled = true;
+            }
+            else
+            {
+                MessageBox.Show("Please input the subject's name!");
+            }
+        }
+
+        private void button_stop_recording_Click(object sender, EventArgs e)
+        {
+            recording = false;
+            myStreamWriter.Close();
+            myFileStream.Close();
+
+            button_start_recording.Enabled = true;
+            button_stop_recording.Enabled = false;
         }
     }
 }
