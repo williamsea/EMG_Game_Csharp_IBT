@@ -51,17 +51,18 @@ namespace Hai_EMG_Game
         Boolean totalHitsCounted = false;
         int totalTrials = 0;
 
-        //Recording
+        //Recording and Reading
         string savingPath = "C:\\Users\\Owner\\Desktop\\Game_Data\\";
         FileStream myFileStream;
         StreamWriter myStreamWriter;
         Boolean recording = false;
+        string readingPath;
+        int[] savedEnvelop = new int[1000000];//1000s
+        int[] savedDigitizedEnvelop = new int[1000000];
 
         public MainForm()
         {
             InitializeComponent();
-            //SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-            //this.BackColor = Color.Transparent;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -206,7 +207,6 @@ namespace Hai_EMG_Game
                 this.chart_DigitBar.Series[1].BorderColor = Color.FromArgb(200, 184, 131, 11); //Dark Gold
                 this.chart_DigitBar.Series[1].BorderWidth = 5;
 
-                //this.chart_DigitBar.Refresh();
                 if (hitCounts > timeInterval * 1000 * hitThreshold)
                 {
                     this.chart_DigitBar.Series[1].Color = Color.FromArgb(200, 0, 255, 0); //Green
@@ -300,46 +300,29 @@ namespace Hai_EMG_Game
                 center = 0;
                 MessageBox.Show("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" );
                 isGameStart = false;
+                button_StartGame.Enabled = true;
+                button_stop_recording_Click(sender, e);
             }
 
         }
 
         private void button_StartGame_Click(object sender, EventArgs e)
         {
-            totalHits = 0;
-            totalTrials = 0; //Already including the initial one, since it actually counts from 10, 20, ... 80 to get stopped, but the real number should be 7 (10-70).
-            isGameStart = true;
-            timer_targetLevel.Enabled = true;
-            center = spaceInterval;
-        }
+            if (textBox_subjectName.Text != "" && textBox_envelopWinLen.Text!="")
+            {
+                totalHits = 0;
+                totalTrials = 0; //Already including the initial one, since it actually counts from 10, 20, ... 80 to get stopped, but the real number should be 7 (10-70).
+                isGameStart = true;
+                timer_targetLevel.Enabled = true;
+                center = spaceInterval;
+                button_StartGame.Enabled = false;
 
-
-
-
-
-        //Test button and timer for debugging
-        private void buttonTest_Click(object sender, EventArgs e)
-        {
-            //this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
-            //this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Halo", 100);
-            //timerTest.Enabled = true;
-
-            //this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
-            //this.chart_DigitBar.Series["targetLevel"].Points.Clear();
-            //this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Strength", 0,70);
-            //this.chart_DigitBar.Series["BarEMGVal"]["DrawSideBySide"] = "false";
-            //this.chart_DigitBar.Series[0].Color = Color.FromArgb(128, 255, 0, 0);
-            //this.chart_DigitBar.Series["targetLevel"].Points.AddXY("Strength", 30,50); //Note that counter++ after putting in data. So we need counter - 1 here!!!
-            //this.chart_DigitBar.Series["targetLevel"]["DrawSideBySide"] = "false";
-            //this.chart_DigitBar.Series[1].Color = Color.FromArgb(128, 0, 255, 0);
-
-        }
-
-        private void timerTest_Tick(object sender, EventArgs e)
-        {
-            //disp++;
-            //this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
-            //this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Halo", disp);
+                button_start_recording_Click(sender, e);
+            }
+            else
+            {
+                MessageBox.Show("Please Enter Your Name and Envelop Window Length!");
+            }
         }
 
         private void button_switchGraph_Click(object sender, EventArgs e)
@@ -363,7 +346,7 @@ namespace Hai_EMG_Game
                 {
                     Directory.CreateDirectory(savingPath + textBox_subjectName.Text);
                 }
-                string filePath = savingPath + textBox_subjectName.Text + "\\" + DateTime.Now.ToString("dd-mm-yyyy_hh-mm-ss") + ".txt";
+                string filePath = savingPath + textBox_subjectName.Text + textBox_envelopWinLen + "\\" + DateTime.Now.ToString("dd-mm-yyyy_hh-mm-ss") + ".txt";
                 myFileStream = new FileStream(filePath, System.IO.FileMode.Create);
                 myStreamWriter = new StreamWriter(myFileStream);
                 recording = true;
@@ -385,6 +368,89 @@ namespace Hai_EMG_Game
 
             button_start_recording.Enabled = true;
             button_stop_recording.Enabled = false;
+        }
+
+        private void button_select_file_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog myOpenFileDialog = new OpenFileDialog();
+            myOpenFileDialog.InitialDirectory = savingPath;
+            myOpenFileDialog.Filter = "txt Files(*.txt)|*.txt|All Files(*.*)|*.*";
+            if (myOpenFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                readingPath = myOpenFileDialog.FileName;
+            }
+            textBox_ReadDirectory.Text = readingPath;
+            Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
+        }
+
+        private void button_display_file_Click(object sender, EventArgs e)
+        {
+            if (textBox_ReadDirectory.Text != "")
+            {
+                timer_display.Enabled = false;
+                readingPath = textBox_ReadDirectory.Text;
+                Read_txt();
+            }
+            else
+            {
+                MessageBox.Show("Please Select or Input the Read File");
+            }
+        }
+
+        private void Read_txt()
+        {
+            StreamReader myStreamReader = new StreamReader(readingPath, Encoding.Default);
+            string wholeString;
+            string[] wholeStringArray;
+            int[] wholeIntArray;
+            wholeString = myStreamReader.ReadToEnd();
+            wholeStringArray = wholeString.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries);
+            wholeIntArray = Array.ConvertAll(wholeStringArray, int.Parse);
+            myStreamReader.Close();
+
+            int id = 0;
+            for(int i=1; i< wholeIntArray.Length; i += 3)
+            {
+                savedEnvelop[id] = wholeIntArray[i];
+                id++;
+            }
+            id = 0;
+            for(int i=2; i<wholeIntArray.Length; i += 3)
+            {
+                savedDigitizedEnvelop[id] = wholeIntArray[i];
+                id++;
+            }
+
+            DisplayFileData(id);
+        }
+
+        private void DisplayFileData(int dispLength)
+        {
+            this.chart_EMGrealtime.Series["EMGVal"].Points.Clear();
+            for (disp = 0; disp < dispLength; disp++)
+            {
+                if (!showDigitized)
+                {
+                    this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = Double.NaN; //Default AutoScale
+                    this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = Double.NaN;
+                    this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = Double.NaN;
+                    this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Filtered EMG Signal From File";
+                    this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), savedEnvelop[disp]);
+                }
+                else
+                {
+                    this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
+                    this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
+                    this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
+                    this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-77) From File";
+                    this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), savedDigitizedEnvelop[disp]);
+                }
+            }
+        }
+
+        private void button_return_realtime_Click(object sender, EventArgs e)
+        {
+            timer_display.Enabled = true;
         }
     }
 }
