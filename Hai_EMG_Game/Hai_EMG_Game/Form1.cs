@@ -45,7 +45,7 @@ namespace Hai_EMG_Game
         int elapsedTime = 0;
         int center = 0;
         int halfWidth = 5;
-        int timeInterval = 3;
+        int timeInterval = 5;
         int spaceInterval = 10;
         int hitCounts = 0;
         int peakLevel = 0;//77 for D2 and 90 for OB, i.e., 10-70 for D2 and 10-90 for OB
@@ -66,6 +66,11 @@ namespace Hai_EMG_Game
         int[] savedDigitizedEnvelop = new int[1000000];
         string electrode = "";
         string filePath;
+
+        //Training
+        int trainingTime = 5;
+        int trainingElapsed = 0;
+
 
         public MainForm()
         {
@@ -556,6 +561,32 @@ namespace Hai_EMG_Game
             timer_display.Enabled = false;
             button_pause.Enabled = false;
             button_startDisplay.Enabled = true;
+        }
+
+        private void timer_training_Tick(object sender, EventArgs e)
+        {
+            trainingElapsed++;
+            if(trainingElapsed == trainingTime)
+            {
+                if(electrode == "IBT")
+                {
+                    signalPeakD2 = envelop.Max();
+                }
+                else if(electrode == "OttoBock")
+                {
+                    signalPeakOB = envelop.Max();
+                    stepSizeOB = signalPeakOB / 100.0;
+                }
+                button_training.BackColor = Color.Lime;
+                button_training.Text = "Your Trained Max Strength is " + envelop.Max().ToString();
+            }
+        }
+
+        private void button_training_Click(object sender, EventArgs e)
+        {
+            button_start_Click(sender,e);
+            timer_training.Enabled = true;
+            button_training.BackColor = Color.Cyan;
         }
     }
 }
