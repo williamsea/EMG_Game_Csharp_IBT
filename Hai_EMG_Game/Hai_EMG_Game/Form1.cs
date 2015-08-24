@@ -71,6 +71,11 @@ namespace Hai_EMG_Game
         int trainingTime = 5;
         int trainingElapsed = 0;
 
+        //Time cost to hit the target
+        double hitCostTime = 0;
+        double[] hitCostTimeArray = new double[10];
+        int hitCostTimeArrayId = 0;
+
 
         public MainForm()
         {
@@ -132,7 +137,11 @@ namespace Hai_EMG_Game
 
                     if(electrode == "IBT")
                     {
-                        DACenvelop[counter] = envelop[counter] * 255 / signalPeakD2;
+                        if (signalPeakD2 != 0)//Handle special case.
+                        {
+                            DACenvelop[counter] = envelop[counter] * 255 / signalPeakD2;
+                        }
+                        
                         if (DACenvelop[counter] > 255)
                         {
                             DACenvelop[counter] = 255;
@@ -152,7 +161,7 @@ namespace Hai_EMG_Game
                         myStreamWriter.WriteLine();
                     }
 
-                    counter++;
+                    counter++; 
                 }
             }
 
@@ -258,11 +267,13 @@ namespace Hai_EMG_Game
                     {
                         totalHits++;
                         totalHitsCounted = true;
+                        textBox_hitCostTime.Text = (hitCostTime/10.0).ToString() + "s";
+                        hitCostTimeArray[hitCostTimeArrayId] =(hitCostTime / 10.0);
+                        hitCostTimeArrayId++;
                     }
-                    
                 }
 
-                if(center == 0)
+                if (center == 0)
                 {
                     this.chart_DigitBar.Series[1].Color = Color.FromArgb(0, 0, 0, 0); //Disappear
                     this.chart_DigitBar.Series[1].BorderWidth = 0;
@@ -353,18 +364,19 @@ namespace Hai_EMG_Game
                 totalTrials++;
                 hitCountsRefresh = true;
                 totalHitsCounted = false;
+                hitCostTime = 0;//reset hitCostTime everytime the target bar changes
             }
 
-            if(electrode == "IBT")
+            if (electrode == "IBT")
             {
                 peakLevel = 77;
             }
-            else if(electrode == "OttoBock")
+            else if (electrode == "OttoBock")
             {
                 peakLevel = 90;
             }
 
-            if(center > peakLevel)
+            if (center > peakLevel)
             {
                 timer_targetLevel.Enabled = false;
                 center = 0;
@@ -372,19 +384,26 @@ namespace Hai_EMG_Game
                 isGameStart = false;
                 button_StartGame.Enabled = true;
                 myStreamWriter.Write("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!");
+                myStreamWriter.WriteLine();
+                for (int i = 0; i < hitCostTimeArray.Length; i++)
+                {
+                    myStreamWriter.Write(hitCostTimeArray[i]+"\t");
+                }
                 button_stop_recording_Click(sender, e);
                 button_StartGame.BackColor = Color.Gold;
+                timer_hitCostTime.Enabled = false;
             }
-
         }
 
         private void button_StartGame_Click(object sender, EventArgs e)
         {
-            button_start_Click(sender, e);
-            button_StartGame.BackColor = Color.Lime;
-
             if (textBox_subjectName.Text != "")
             {
+                hitCostTimeArrayId = 0;
+                timer_hitCostTime.Enabled = true;
+                hitCostTime = 0;//reset after game start
+                button_start_Click(sender, e);
+                button_StartGame.BackColor = Color.Lime;
                 totalHits = 0;
                 totalTrials = 0; //Already including the initial one, since it actually counts from 10, 20, ... 80 to get stopped, but the real number should be 7 (10-70).
                 isGameStart = true;
@@ -411,6 +430,11 @@ namespace Hai_EMG_Game
             {
                 button_switchGraph.Text = "Show Digitalized EMG Envelopl";
             }
+
+            if(timer_display.Enabled == false)
+            {
+                button_display_file_Click(sender, e);
+            }
         }
 
         private void button_start_recording_Click(object sender, EventArgs e)
@@ -432,7 +456,7 @@ namespace Hai_EMG_Game
                     {
                         Directory.CreateDirectory(savingPath + textBox_subjectName.Text + electrode );
                     }
-                    filePath = savingPath + textBox_subjectName.Text + electrode + "\\" + DateTime.Now.ToString("dd-mm-yyyy_hh-mm-ss") + ".txt";
+                    filePath = savingPath + textBox_subjectName.Text + electrode + "\\" + DateTime.Now.ToString("dd-MM-yyyy_hh-mm-ss") + ".txt";
                 }
                 
                 myFileStream = new FileStream(filePath, System.IO.FileMode.Create);
@@ -494,6 +518,7 @@ namespace Hai_EMG_Game
             wholeString = myStreamReader.ReadToEnd();
             wholeStringArray = wholeString.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries);
             Array.Resize(ref wholeStringArray, wholeStringArray.Length - 10);//Remove the last 10 elements in array by resizing, which are "Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" 
+            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 10);//Remove the 10 hitCostTime values
             wholeIntArray = Array.ConvertAll(wholeStringArray, int.Parse);
             myStreamReader.Close();
 
@@ -566,19 +591,29 @@ namespace Hai_EMG_Game
         private void timer_training_Tick(object sender, EventArgs e)
         {
             trainingElapsed++;
-            if(trainingElapsed == trainingTime)
+
+            if (trainingElapsed == trainingTime)
             {
-                if(electrode == "IBT")
+                int[] TrainingData = new int[10000];//10s
+                for (int i = counter - trainingTime * 1000; i < counter; i++)
                 {
-                    signalPeakD2 = envelop.Max();
+                    TrainingData[i - (counter - trainingTime * 1000)] = envelop[i];
+                }
+
+                if (electrode == "IBT")
+                {
+                    signalPeakD2 = TrainingData.Max(); //stepSizeD2 = 256/77
                 }
                 else if(electrode == "OttoBock")
                 {
-                    signalPeakOB = envelop.Max();
-                    stepSizeOB = signalPeakOB / 100.0;
+                    signalPeakOB = TrainingData.Max();
+                    stepSizeOB = signalPeakOB / 100;
                 }
                 button_training.BackColor = Color.Lime;
-                button_training.Text = "Your Trained Max Strength is " + envelop.Max().ToString();
+                button_training.Text = "Your Trained Max Strength is " + TrainingData.Max().ToString() + "\n"+ "(Click to Retrain)";
+                timer_training.Enabled = false;
+                trainingElapsed = 0;//Reset training timer value
+                
             }
         }
 
@@ -587,6 +622,11 @@ namespace Hai_EMG_Game
             button_start_Click(sender,e);
             timer_training.Enabled = true;
             button_training.BackColor = Color.Cyan;
+        }
+
+        private void timer_hitCostTime_Tick(object sender, EventArgs e)
+        {
+            hitCostTime++; //Seems the timer is not running at 1000Hz, but 10Hz only instead. The DataReceived event is called every 1ms!!! So use this as a timer. Worked once but not anymore.
         }
     }
 }

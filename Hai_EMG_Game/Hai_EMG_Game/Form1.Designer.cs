@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title1 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title5 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series9 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title6 = new System.Windows.Forms.DataVisualization.Charting.Title();
             this.serialPort = new System.IO.Ports.SerialPort(this.components);
             this.button_startDisplay = new System.Windows.Forms.Button();
             this.timer_display = new System.Windows.Forms.Timer(this.components);
@@ -68,6 +68,9 @@
             this.label4 = new System.Windows.Forms.Label();
             this.button_training = new System.Windows.Forms.Button();
             this.timer_training = new System.Windows.Forms.Timer(this.components);
+            this.textBox_hitCostTime = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.timer_hitCostTime = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.chart_EMGrealtime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart_DigitBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_displayLength)).BeginInit();
@@ -101,55 +104,56 @@
             // 
             // chart_EMGrealtime
             // 
-            chartArea1.AxisX.Title = "Time (s)";
-            chartArea1.AxisY.Title = "Envelop";
-            chartArea1.BorderWidth = 2;
-            chartArea1.CursorX.IsUserSelectionEnabled = true;
-            chartArea1.Name = "ChartArea1";
-            this.chart_EMGrealtime.ChartAreas.Add(chartArea1);
+            chartArea5.AxisX.Title = "Time (s)";
+            chartArea5.AxisY.Title = "Envelop";
+            chartArea5.BorderWidth = 2;
+            chartArea5.CursorX.IsUserSelectionEnabled = true;
+            chartArea5.CursorY.IsUserSelectionEnabled = true;
+            chartArea5.Name = "ChartArea1";
+            this.chart_EMGrealtime.ChartAreas.Add(chartArea5);
             this.chart_EMGrealtime.Location = new System.Drawing.Point(256, 69);
             this.chart_EMGrealtime.Name = "chart_EMGrealtime";
-            series1.BorderWidth = 3;
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series1.Name = "EMGVal";
-            this.chart_EMGrealtime.Series.Add(series1);
+            series7.BorderWidth = 3;
+            series7.ChartArea = "ChartArea1";
+            series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series7.Name = "EMGVal";
+            this.chart_EMGrealtime.Series.Add(series7);
             this.chart_EMGrealtime.Size = new System.Drawing.Size(825, 702);
             this.chart_EMGrealtime.TabIndex = 3;
             this.chart_EMGrealtime.Text = "chart1";
-            title1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            title1.Name = "EMG_Envelop";
-            title1.Text = "EMG Envelop";
-            this.chart_EMGrealtime.Titles.Add(title1);
+            title5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            title5.Name = "EMG_Envelop";
+            title5.Text = "EMG Envelop";
+            this.chart_EMGrealtime.Titles.Add(title5);
             // 
             // chart_DigitBar
             // 
-            chartArea2.AxisY.Interval = 10D;
-            chartArea2.AxisY.Maximum = 80D;
-            chartArea2.AxisY.Minimum = 0D;
-            chartArea2.BorderWidth = 2;
-            chartArea2.CursorX.IsUserSelectionEnabled = true;
-            chartArea2.Name = "ChartArea1";
-            this.chart_DigitBar.ChartAreas.Add(chartArea2);
+            chartArea6.AxisY.Interval = 10D;
+            chartArea6.AxisY.Maximum = 80D;
+            chartArea6.AxisY.Minimum = 0D;
+            chartArea6.BorderWidth = 2;
+            chartArea6.CursorX.IsUserSelectionEnabled = true;
+            chartArea6.Name = "ChartArea1";
+            this.chart_DigitBar.ChartAreas.Add(chartArea6);
             this.chart_DigitBar.Location = new System.Drawing.Point(1087, 69);
             this.chart_DigitBar.Name = "chart_DigitBar";
-            series2.BorderWidth = 5;
-            series2.ChartArea = "ChartArea1";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeColumn;
-            series2.Name = "BarEMGVal";
-            series2.YValuesPerPoint = 2;
-            series3.ChartArea = "ChartArea1";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeColumn;
-            series3.Name = "targetLevel";
-            series3.YValuesPerPoint = 2;
-            this.chart_DigitBar.Series.Add(series2);
-            this.chart_DigitBar.Series.Add(series3);
+            series8.BorderWidth = 5;
+            series8.ChartArea = "ChartArea1";
+            series8.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeColumn;
+            series8.Name = "BarEMGVal";
+            series8.YValuesPerPoint = 2;
+            series9.ChartArea = "ChartArea1";
+            series9.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeColumn;
+            series9.Name = "targetLevel";
+            series9.YValuesPerPoint = 2;
+            this.chart_DigitBar.Series.Add(series8);
+            this.chart_DigitBar.Series.Add(series9);
             this.chart_DigitBar.Size = new System.Drawing.Size(328, 702);
             this.chart_DigitBar.TabIndex = 5;
-            title2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            title2.Name = "Real Time Bar";
-            title2.Text = "Real Time Bar";
-            this.chart_DigitBar.Titles.Add(title2);
+            title6.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            title6.Name = "Real Time Bar";
+            title6.Text = "Real Time Bar";
+            this.chart_DigitBar.Titles.Add(title6);
             // 
             // trackBar_displayLength
             // 
@@ -229,6 +233,7 @@
             this.textBox_subjectName.Name = "textBox_subjectName";
             this.textBox_subjectName.Size = new System.Drawing.Size(204, 26);
             this.textBox_subjectName.TabIndex = 14;
+            this.textBox_subjectName.Text = "Temp";
             // 
             // label1
             // 
@@ -443,11 +448,36 @@
             this.timer_training.Interval = 1000;
             this.timer_training.Tick += new System.EventHandler(this.timer_training_Tick);
             // 
+            // textBox_hitCostTime
+            // 
+            this.textBox_hitCostTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_hitCostTime.Location = new System.Drawing.Point(1302, 777);
+            this.textBox_hitCostTime.Name = "textBox_hitCostTime";
+            this.textBox_hitCostTime.Size = new System.Drawing.Size(62, 26);
+            this.textBox_hitCostTime.TabIndex = 19;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(1127, 780);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(169, 20);
+            this.label5.TabIndex = 53;
+            this.label5.Text = "Time Cost For This Hit:";
+            // 
+            // timer_hitCostTime
+            // 
+            this.timer_hitCostTime.Interval = 1;
+            this.timer_hitCostTime.Tick += new System.EventHandler(this.timer_hitCostTime_Tick);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1474, 837);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.textBox_hitCostTime);
             this.Controls.Add(this.button_training);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.groupBox4);
@@ -509,6 +539,9 @@
         private System.Windows.Forms.Button button_pause;
         private System.Windows.Forms.Button button_training;
         private System.Windows.Forms.Timer timer_training;
+        private System.Windows.Forms.TextBox textBox_hitCostTime;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Timer timer_hitCostTime;
     }
 }
 
