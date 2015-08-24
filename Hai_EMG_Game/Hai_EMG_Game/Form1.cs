@@ -40,12 +40,16 @@ namespace Hai_EMG_Game
         int DisplayLength = 10000; //Sampling rate = 1000
         int disp;
         Boolean showDigitized = false;
+        Boolean showBar = false;
 
-        //Target Levels
+        //Target Levels and rest
         int elapsedTime = 0;
         int center = 0;
         int halfWidth = 5;
         int timeInterval = 5;
+        int timeRest = 4; //3s + Go
+        int restTimeElapsed = 0;
+        int timeCountDownStart = 4;//3s + Go
         int spaceInterval = 10;
         int hitCounts = 0;
         int peakLevel = 0;//77 for D2 and 90 for OB, i.e., 10-70 for D2 and 10-90 for OB
@@ -55,6 +59,8 @@ namespace Hai_EMG_Game
         int totalHits = 0;
         Boolean totalHitsCounted = false;
         int totalTrials = 0;
+        Boolean isResting = false;
+        int countDownTimer = 0;
 
         //Recording and Reading
         string savingPath = "C:\\Users\\Owner\\Desktop\\Game_Data\\";
@@ -88,6 +94,7 @@ namespace Hai_EMG_Game
             electrode = "IBT";
             button_IBTVD.Enabled = false;
             button_pause.Enabled = false;
+            countDownTimer = timeInterval*10;
         }
 
         private void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
@@ -215,68 +222,74 @@ namespace Hai_EMG_Game
             //Bar Graph
             if (counter > 1)
             {
-                if (isGameStart && center != 0)
+                if (isGameStart && center != 0 && !isResting || showBar)
                 {
-                    if (hitCountsRefresh) //Every time the target area updated, refresh the hitCounts.
+                        if (hitCountsRefresh) //Every time the target area updated, refresh the hitCounts.
+                        {
+                            hitCounts = 0;
+                            hitCountsRefresh = false;
+                        }
+                        if (digitizedEnvelop[counter - 1] > center - halfWidth && digitizedEnvelop[counter - 1] < center + halfWidth)
+                        {
+                            hitCounts++; //Count the accumulated time in the target area
+                        }
+                
+
+                    this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
+                    this.chart_DigitBar.Series["targetLevel"].Points.Clear();
+
+                    if (electrode == "IBT")
                     {
-                        hitCounts = 0;
-                        hitCountsRefresh = false;
+                        this.chart_DigitBar.ChartAreas[0].AxisY.Maximum = 80;
+                        this.chart_DigitBar.ChartAreas[0].AxisY.Minimum = 0;
+                        this.chart_DigitBar.ChartAreas[0].AxisY.Interval = 10;
+                        this.chart_DigitBar.Titles["Real Time Bar"].Text = "D2 Real Time Bar (0-77)";
                     }
-                    if (digitizedEnvelop[counter - 1] > center - halfWidth && digitizedEnvelop[counter - 1] < center + halfWidth)
+                    else if (electrode == "OttoBock")
                     {
-                        hitCounts++; //Count the accumulated time in the target area
+                        this.chart_DigitBar.ChartAreas[0].AxisY.Maximum = 100;
+                        this.chart_DigitBar.ChartAreas[0].AxisY.Minimum = 0;
+                        this.chart_DigitBar.ChartAreas[0].AxisY.Interval = 10;
+                        this.chart_DigitBar.Titles["Real Time Bar"].Text = "OB Real Time Bar (0-100)";
                     }
-                }
 
-                this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
-                this.chart_DigitBar.Series["targetLevel"].Points.Clear();
+                    this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Strength", 0, digitizedEnvelop[counter - 1]); //Note that counter++ after putting in data. So we need counter - 1 here!!!
+                    this.chart_DigitBar.Series["BarEMGVal"]["DrawSideBySide"] = "false"; //Overlap two series
+                    this.chart_DigitBar.Series[0].Color = Color.FromArgb(200, 255, 0, 0); //Set color and transparency //Red
+                    this.chart_DigitBar.Series[0].BorderColor = Color.FromArgb(200, 0, 0, 128); //Navy
 
-                if (electrode == "IBT")
-                {
-                    this.chart_DigitBar.ChartAreas[0].AxisY.Maximum = 80;
-                    this.chart_DigitBar.ChartAreas[0].AxisY.Minimum = 0;
-                    this.chart_DigitBar.ChartAreas[0].AxisY.Interval = 10;
-                    this.chart_DigitBar.Titles["Real Time Bar"].Text = "D2 Real Time Bar (0-77)";
-                }
-                else if (electrode == "OttoBock")
-                {
-                    this.chart_DigitBar.ChartAreas[0].AxisY.Maximum = 100;
-                    this.chart_DigitBar.ChartAreas[0].AxisY.Minimum = 0;
-                    this.chart_DigitBar.ChartAreas[0].AxisY.Interval = 10;
-                    this.chart_DigitBar.Titles["Real Time Bar"].Text = "OB Real Time Bar (0-100)";
-                }
-
-                this.chart_DigitBar.Series["BarEMGVal"].Points.AddXY("Strength", 0, digitizedEnvelop[counter - 1]); //Note that counter++ after putting in data. So we need counter - 1 here!!!
-                this.chart_DigitBar.Series["BarEMGVal"]["DrawSideBySide"] = "false"; //Overlap two series
-                this.chart_DigitBar.Series[0].Color = Color.FromArgb(200, 255, 0, 0); //Set color and transparency //Red
-                this.chart_DigitBar.Series[0].BorderColor = Color.FromArgb(200, 0, 0, 128); //Navy
-
-                this.chart_DigitBar.Series["targetLevel"].Points.AddXY("Strength", center - halfWidth, center + halfWidth);
-                this.chart_DigitBar.Series["targetLevel"]["DrawSideBySide"] = "false";
-                this.chart_DigitBar.Series[1].Color = Color.FromArgb(200, 255, 215, 0); //Gold
-                this.chart_DigitBar.Series[1].BorderColor = Color.FromArgb(200, 184, 131, 11); //Dark Gold
-                this.chart_DigitBar.Series[1].BorderWidth = 5;
-
-                if (hitCounts > timeInterval * 1000 * hitThreshold)
-                {
-                    this.chart_DigitBar.Series[1].Color = Color.FromArgb(200, 0, 255, 0); //Green
-                    this.chart_DigitBar.Series[1].BorderColor = Color.FromArgb(200, 0, 100, 0); //Dark Green
+                    this.chart_DigitBar.Series["targetLevel"].Points.AddXY("Strength", center - halfWidth, center + halfWidth);
+                    this.chart_DigitBar.Series["targetLevel"]["DrawSideBySide"] = "false";
+                    this.chart_DigitBar.Series[1].Color = Color.FromArgb(200, 255, 215, 0); //Gold
+                    this.chart_DigitBar.Series[1].BorderColor = Color.FromArgb(200, 184, 131, 11); //Dark Gold
                     this.chart_DigitBar.Series[1].BorderWidth = 5;
 
-                    if (!totalHitsCounted)
+                    if (hitCounts > timeInterval * 1000 * hitThreshold)
                     {
-                        totalHits++;
-                        totalHitsCounted = true;
-                        textBox_hitCostTime.Text = (hitCostTime/10.0).ToString() + "s";
-                        hitCostTimeArray[hitCostTimeArrayId] =(hitCostTime / 10.0);
-                        hitCostTimeArrayId++;
+                        this.chart_DigitBar.Series[1].Color = Color.FromArgb(200, 0, 255, 0); //Green
+                        this.chart_DigitBar.Series[1].BorderColor = Color.FromArgb(200, 0, 100, 0); //Dark Green
+                        this.chart_DigitBar.Series[1].BorderWidth = 5;
+
+                        if (!totalHitsCounted)
+                        {
+                            totalHits++;
+                            totalHitsCounted = true;
+                            textBox_hitCostTime.Text = (hitCostTime/10.0).ToString() + "s";
+                            hitCostTimeArray[hitCostTimeArrayId] =(hitCostTime / 10.0);
+                            hitCostTimeArrayId++;
+                        }
+                    }
+
+                    if (center == 0)
+                    {
+                        this.chart_DigitBar.Series[1].Color = Color.FromArgb(0, 0, 0, 0); //Disappear
+                        this.chart_DigitBar.Series[1].BorderWidth = 0;
                     }
                 }
-
-                if (center == 0)
+                else
                 {
-                    this.chart_DigitBar.Series[1].Color = Color.FromArgb(0, 0, 0, 0); //Disappear
-                    this.chart_DigitBar.Series[1].BorderWidth = 0;
+                    this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
+                    this.chart_DigitBar.Series["targetLevel"].Points.Clear();
                 }
             }
 
@@ -358,60 +371,93 @@ namespace Hai_EMG_Game
         private void timer_targetLevel_Tick(object sender, EventArgs e)
         {
             elapsedTime++;
-            if(elapsedTime % timeInterval == 0) // update every timeInterval second
+            if (elapsedTime < timeCountDownStart-1)
             {
-                center += spaceInterval;
-                totalTrials++;
-                hitCountsRefresh = true;
-                totalHitsCounted = false;
-                hitCostTime = 0;//reset hitCostTime everytime the target bar changes
+                textBox_InstructionBoard.Text = "Game Starts in " + (timeCountDownStart - elapsedTime-1) + "s";
             }
+            else if (elapsedTime == timeCountDownStart - 1)
+            {
+                textBox_InstructionBoard.Text = "Go!";
+            }
+            else //The game really starts here after 3s count down
+            {
+                showBar = false;
+                isGameStart = true;
+                timer_100ms.Enabled = true;
 
-            if (electrode == "IBT")
-            {
-                peakLevel = 77;
-            }
-            else if (electrode == "OttoBock")
-            {
-                peakLevel = 90;
-            }
-
-            if (center > peakLevel)
-            {
-                timer_targetLevel.Enabled = false;
-                center = 0;
-                MessageBox.Show("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" );
-                isGameStart = false;
-                button_StartGame.Enabled = true;
-                myStreamWriter.Write("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!");
-                myStreamWriter.WriteLine();
-                for (int i = 0; i < hitCostTimeArray.Length; i++)
+                textBox_InstructionBoard.Visible = false;
+                if ((elapsedTime - timeCountDownStart) % timeInterval == 0 && (elapsedTime - timeCountDownStart)!=0) // update every timeInterval second
                 {
-                    myStreamWriter.Write(hitCostTimeArray[i]+"\t");
+                    center += spaceInterval;
+                    totalTrials++;
+                    hitCountsRefresh = true;
+                    totalHitsCounted = false;
+                    hitCostTime = 0;//reset hitCostTime everytime the target bar changes
+
+                    //Rest stuffs handling
+                    textBox_InstructionBoard.Visible = true;
+                    textBox_InstructionBoard.Text = "Rest for " + (timeRest - restTimeElapsed - 1) + "s";
+                    timer_targetLevel.Enabled = false;
+                    timer_100ms.Enabled = false;
+                    timer_rest.Enabled = true;
+                    isResting = true;
                 }
-                button_stop_recording_Click(sender, e);
-                button_StartGame.BackColor = Color.Gold;
-                timer_hitCostTime.Enabled = false;
+
+                if (electrode == "IBT")
+                {
+                    peakLevel = 77;
+                }
+                else if (electrode == "OttoBock")
+                {
+                    peakLevel = 90;
+                }
+
+                if (center > peakLevel)
+                {
+                    timer_targetLevel.Enabled = false;
+                    timer_rest.Enabled = false;
+                    center = 0;
+                    MessageBox.Show("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!");
+                    isGameStart = false;
+                    button_StartGame.Enabled = true;
+                    myStreamWriter.Write("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!");
+                    myStreamWriter.WriteLine();
+                    for (int i = 0; i < hitCostTimeArray.Length; i++)
+                    {
+                        myStreamWriter.Write(hitCostTimeArray[i] + "\t");
+                    }
+                    button_stop_recording_Click(sender, e);
+                    button_StartGame.BackColor = Color.Gold;
+                    timer_100ms.Enabled = false;
+                    textBox_countDown.Text = "";
+                    textBox_hitCostTime.Text = "";
+                    textBox_InstructionBoard.Visible = false;
+
+                    showBar = true;
+                }
             }
+            
         }
 
         private void button_StartGame_Click(object sender, EventArgs e)
         {
             if (textBox_subjectName.Text != "")
             {
+                textBox_InstructionBoard.Visible = true;
+                textBox_InstructionBoard.Text = "Game Starts in " + (timeCountDownStart - elapsedTime - 1) + "s";
+                textBox_InstructionBoard.BackColor = Color.Lime;
                 hitCostTimeArrayId = 0;
-                timer_hitCostTime.Enabled = true;
                 hitCostTime = 0;//reset after game start
-                button_start_Click(sender, e);
-                button_StartGame.BackColor = Color.Lime;
                 totalHits = 0;
                 totalTrials = 0; //Already including the initial one, since it actually counts from 10, 20, ... 80 to get stopped, but the real number should be 7 (10-70).
-                isGameStart = true;
-                timer_targetLevel.Enabled = true;
                 center = spaceInterval;
-                button_StartGame.Enabled = false;
 
+                button_start_Click(sender, e);
+                button_StartGame.BackColor = Color.Lime;
+                button_StartGame.Enabled = false;
                 button_start_recording_Click(sender, e);
+
+                timer_targetLevel.Enabled = true;
             }
             else
             {
@@ -613,7 +659,6 @@ namespace Hai_EMG_Game
                 button_training.Text = "Your Trained Max Strength is " + TrainingData.Max().ToString() + "\n"+ "(Click to Retrain)";
                 timer_training.Enabled = false;
                 trainingElapsed = 0;//Reset training timer value
-                
             }
         }
 
@@ -624,9 +669,42 @@ namespace Hai_EMG_Game
             button_training.BackColor = Color.Cyan;
         }
 
-        private void timer_hitCostTime_Tick(object sender, EventArgs e)
+        private void timer_100ms_Tick(object sender, EventArgs e)
         {
             hitCostTime++; //Seems the timer is not running at 1000Hz, but 10Hz only instead. The DataReceived event is called every 1ms!!! So use this as a timer. Worked once but not anymore.
+
+            countDownTimer--;
+            textBox_countDown.Text = Math.Round((countDownTimer/10.0),1).ToString() + "s";
+            if(countDownTimer == 0)
+            {
+                countDownTimer = timeInterval * 10;
+            }
+        }
+
+        private void timer_rest_Tick(object sender, EventArgs e)
+        {
+            timer_targetLevel.Enabled = false;
+            restTimeElapsed++;
+            if (restTimeElapsed < timeRest - 1)
+            {
+                textBox_InstructionBoard.Text = "Rest for " + (timeRest - restTimeElapsed - 1) + "s";
+            }
+           if(restTimeElapsed == timeRest - 1)
+            {
+                textBox_InstructionBoard.Text = "Go!";
+            }
+
+            if(restTimeElapsed == timeRest)
+            {
+                textBox_InstructionBoard.Visible = false;
+                timer_targetLevel.Enabled = true;
+                timer_100ms.Enabled = true;
+                countDownTimer = timeInterval * 10;
+                timer_rest.Enabled = false;
+                restTimeElapsed = 0;
+                isResting = false;
+            }
+
         }
     }
 }
