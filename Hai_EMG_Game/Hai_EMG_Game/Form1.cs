@@ -780,5 +780,11 @@ namespace Hai_EMG_Game
             }
 
         }
+
+        private void button_resetCursor_Click(object sender, EventArgs e)
+        {
+            this.chart_EMGrealtime.ChartAreas[0].AxisX.ScaleView.ZoomReset();//Reset the manually selected cursors if there are
+            this.chart_EMGrealtime.ChartAreas[0].AxisY.ScaleView.ZoomReset();
+        }
     }
 }
