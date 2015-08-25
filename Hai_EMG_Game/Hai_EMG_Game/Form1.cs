@@ -40,7 +40,7 @@ namespace Hai_EMG_Game
         int DisplayLength = 10000; //Sampling rate = 1000
         int disp;
         Boolean showDigitized = false;
-        Boolean showBar = false;
+        Boolean showBar = true;
 
         //Target Levels and rest
         int elapsedTime = 0;
@@ -50,9 +50,7 @@ namespace Hai_EMG_Game
         int timeRest = 4; //3s + Go
         int restTimeElapsed = 0;
         int timeCountDownStart = 4;//3s + Go
-        int spaceInterval = 10;
         int hitCounts = 0;
-        int peakLevel = 0;//77 for D2 and 90 for OB, i.e., 10-70 for D2 and 10-90 for OB
         Boolean hitCountsRefresh = false;
         double hitThreshold = 0.001; // hitThreshold of timeInterval in target area means really hit
         Boolean isGameStart = false;
@@ -61,6 +59,8 @@ namespace Hai_EMG_Game
         int totalTrials = 0;
         Boolean isResting = false;
         int countDownTimer = 0;
+        Random rnd = new Random();
+        int maxTrials = 3;//10;
 
         //Recording and Reading
         string savingPath = "C:\\Users\\Owner\\Desktop\\Game_Data\\";
@@ -79,8 +79,14 @@ namespace Hai_EMG_Game
 
         //Time cost to hit the target
         double hitCostTime = 0;
-        double[] hitCostTimeArray = new double[10];
-        int hitCostTimeArrayId = 0;
+        List<String> hitCostTimeList = new List<String>(); //The tailing extra 0s will not be counted into length
+
+        //Throughput
+        double ID = 0;//Index of Difficulty
+        double TP = 0;//Throughput
+        double aveTP = 0;
+        List<double> TPList = new List<double>();
+        Boolean gameOver = true;
 
 
         public MainForm()
@@ -270,13 +276,18 @@ namespace Hai_EMG_Game
                         this.chart_DigitBar.Series[1].BorderColor = Color.FromArgb(200, 0, 100, 0); //Dark Green
                         this.chart_DigitBar.Series[1].BorderWidth = 5;
 
-                        if (!totalHitsCounted)
+                        if (!totalHitsCounted && !gameOver)
                         {
                             totalHits++;
                             totalHitsCounted = true;
                             textBox_hitCostTime.Text = (hitCostTime/10.0).ToString() + "s";
-                            hitCostTimeArray[hitCostTimeArrayId] =(hitCostTime / 10.0);
-                            hitCostTimeArrayId++;
+                            hitCostTimeList.Add((hitCostTime / 10.0).ToString());
+
+                            //Calculate the throughput
+                            ID = Math.Log((double)(center / (2 * halfWidth)) + 1, 2);
+                            TP = Math.Round(ID / (hitCostTime / 10),2);
+                            TPList.Add(TP);
+                            textBox_throughput.Text = TP.ToString();
                         }
                     }
 
@@ -381,15 +392,35 @@ namespace Hai_EMG_Game
             }
             else //The game really starts here after 3s count down
             {
-                showBar = false;
                 isGameStart = true;
                 timer_100ms.Enabled = true;
 
                 textBox_InstructionBoard.Visible = false;
                 if ((elapsedTime - timeCountDownStart) % timeInterval == 0 && (elapsedTime - timeCountDownStart)!=0) // update every timeInterval second
                 {
-                    center += spaceInterval;
+                    //Handle the missed cases
+                    if (totalHitsCounted == false)
+                    {
+                        hitCostTimeList.Add("Missed");
+                        textBox_hitCostTime.Text = "Missed";
+
+                        TP = 0;
+                        TPList.Add(TP);
+                        textBox_throughput.Text = TP.ToString();
+                    }
+
+                    if (electrode == "IBT")
+                    {
+                        center = rnd.Next(1, 8) * 10; //number from 1 to 7
+                    }
+                    if (electrode == "OttoBock")
+                    {
+                        center = rnd.Next(1, 10) * 10;//number from 1 to 9
+                    }
+
                     totalTrials++;
+                    textBox_trials.Text = totalTrials.ToString();
+                    textBox_hits.Text = totalHits.ToString();
                     hitCountsRefresh = true;
                     totalHitsCounted = false;
                     hitCostTime = 0;//reset hitCostTime everytime the target bar changes
@@ -403,17 +434,13 @@ namespace Hai_EMG_Game
                     isResting = true;
                 }
 
-                if (electrode == "IBT")
+                if (totalTrials == maxTrials)
                 {
-                    peakLevel = 77;
-                }
-                else if (electrode == "OttoBock")
-                {
-                    peakLevel = 90;
-                }
+                    gameOver = true;
+                    aveTP = Math.Round(TPList.Average(),2);
+                    textBox_aveTP.Text = aveTP.ToString();
+                    textBox_aveTP.BackColor = Color.Lime;
 
-                if (center > peakLevel)
-                {
                     timer_targetLevel.Enabled = false;
                     timer_rest.Enabled = false;
                     center = 0;
@@ -422,10 +449,18 @@ namespace Hai_EMG_Game
                     button_StartGame.Enabled = true;
                     myStreamWriter.Write("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!");
                     myStreamWriter.WriteLine();
-                    for (int i = 0; i < hitCostTimeArray.Length; i++)
+                    for (int i = 0; i < hitCostTimeList.Count; i++)
                     {
-                        myStreamWriter.Write(hitCostTimeArray[i] + "\t");
+                        myStreamWriter.Write(hitCostTimeList[i] + "\t");
                     }
+                    myStreamWriter.WriteLine();
+                    for (int i = 0; i < TPList.Count; i++)
+                    {
+                        myStreamWriter.Write(TPList[i] + "\t");
+                    }
+                    myStreamWriter.WriteLine();
+                    myStreamWriter.Write(aveTP);
+
                     button_stop_recording_Click(sender, e);
                     button_StartGame.BackColor = Color.Gold;
                     timer_100ms.Enabled = false;
@@ -443,14 +478,34 @@ namespace Hai_EMG_Game
         {
             if (textBox_subjectName.Text != "")
             {
+                hitCostTimeList.Clear();
+                TPList.Clear();
+
+                gameOver = false;
+                showBar = false;
+                elapsedTime = 0;
+                textBox_trials.Text = "0";
+                textBox_hits.Text = "0";
+                textBox_throughput.Text = "";
+                textBox_aveTP.Text = "";
+                textBox_aveTP.BackColor = Color.White;
+                isResting = false;
+                hitCountsRefresh = true;
+
                 textBox_InstructionBoard.Visible = true;
                 textBox_InstructionBoard.Text = "Game Starts in " + (timeCountDownStart - elapsedTime - 1) + "s";
                 textBox_InstructionBoard.BackColor = Color.Lime;
-                hitCostTimeArrayId = 0;
                 hitCostTime = 0;//reset after game start
                 totalHits = 0;
                 totalTrials = 0; //Already including the initial one, since it actually counts from 10, 20, ... 80 to get stopped, but the real number should be 7 (10-70).
-                center = spaceInterval;
+                if(electrode == "IBT")
+                {
+                    center = rnd.Next(1, 8)*10; //number from 1 to 7
+                }
+                if(electrode == "OttoBock")
+                {
+                    center = rnd.Next(1, 10)*10;//number from 1 to 9
+                }
 
                 button_start_Click(sender, e);
                 button_StartGame.BackColor = Color.Lime;
@@ -494,7 +549,7 @@ namespace Hai_EMG_Game
                     {
                         Directory.CreateDirectory(savingPath + textBox_subjectName.Text + electrode + textBox_envelopWinLen.Text);
                     }
-                    filePath = savingPath + textBox_subjectName.Text + electrode + textBox_envelopWinLen.Text + "\\" + DateTime.Now.ToString("dd-mm-yyyy_hh-mm-ss") + ".txt";
+                    filePath = savingPath + textBox_subjectName.Text + electrode + textBox_envelopWinLen.Text + "\\" + DateTime.Now.ToString("dd-MM-yyyy_hh-mm-ss") + ".txt";
                 }
                 else if(electrode == "OttoBock")
                 {
@@ -539,6 +594,8 @@ namespace Hai_EMG_Game
             }
             textBox_ReadDirectory.Text = readingPath;
             Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
+
+            button_display_file_Click(sender, e);
         }
 
         private void button_display_file_Click(object sender, EventArgs e)
@@ -548,6 +605,8 @@ namespace Hai_EMG_Game
                 timer_display.Enabled = false;
                 readingPath = textBox_ReadDirectory.Text;
                 Read_txt();
+                this.chart_EMGrealtime.ChartAreas[0].AxisX.ScaleView.ZoomReset();//Reset the manually selected cursors if there are
+                this.chart_EMGrealtime.ChartAreas[0].AxisY.ScaleView.ZoomReset();
             }
             else
             {
@@ -563,8 +622,10 @@ namespace Hai_EMG_Game
             int[] wholeIntArray;
             wholeString = myStreamReader.ReadToEnd();
             wholeStringArray = wholeString.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries);
-            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 10);//Remove the last 10 elements in array by resizing, which are "Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" 
-            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 10);//Remove the 10 hitCostTime values
+            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 10 - hitCostTimeList.Count - TPList.Count - 1 );//Remove the last 10 elements in array by resizing, which are "Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" 
+                                                                                                                       //Remove the 10 hitCostTime values
+                                                                                                                       //Remove the 10 TPArray values
+                                                                                                                       //Remove 1 aveTP values
             wholeIntArray = Array.ConvertAll(wholeStringArray, int.Parse);
             myStreamReader.Close();
 
@@ -589,6 +650,7 @@ namespace Hai_EMG_Game
             this.chart_EMGrealtime.Series["EMGVal"].Points.Clear();
             for (disp = 0; disp < dispLength; disp++)
             {
+
                 if (!showDigitized)
                 {
                     this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = Double.NaN; //Default AutoScale
@@ -599,11 +661,22 @@ namespace Hai_EMG_Game
                 }
                 else
                 {
-                    this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
-                    this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
-                    this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
-                    this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-77) From File";
-                    this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), savedDigitizedEnvelop[disp]);
+                    if(electrode == "IBT")
+                    {
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
+                        this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-77) From File";
+                        this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), savedDigitizedEnvelop[disp]);
+                    }
+                    else
+                    {
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 100;
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
+                        this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-100) From File";
+                        this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), savedDigitizedEnvelop[disp]);
+                    }
                 }
             }
         }
@@ -667,6 +740,7 @@ namespace Hai_EMG_Game
             button_start_Click(sender,e);
             timer_training.Enabled = true;
             button_training.BackColor = Color.Cyan;
+            button_training.Text = "Training: Perform Hard Flexions";
         }
 
         private void timer_100ms_Tick(object sender, EventArgs e)

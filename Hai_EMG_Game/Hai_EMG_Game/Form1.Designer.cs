@@ -75,6 +75,15 @@
             this.timer_rest = new System.Windows.Forms.Timer(this.components);
             this.label6 = new System.Windows.Forms.Label();
             this.textBox_countDown = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.textBox_trials = new System.Windows.Forms.TextBox();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.textBox_hits = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.textBox_aveTP = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.textBox_throughput = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.chart_EMGrealtime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart_DigitBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_displayLength)).BeginInit();
@@ -82,6 +91,7 @@
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // serialPort
@@ -200,7 +210,7 @@
             // button_switchGraph
             // 
             this.button_switchGraph.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_switchGraph.Location = new System.Drawing.Point(563, 769);
+            this.button_switchGraph.Location = new System.Drawing.Point(557, 790);
             this.button_switchGraph.Name = "button_switchGraph";
             this.button_switchGraph.Size = new System.Drawing.Size(263, 36);
             this.button_switchGraph.TabIndex = 11;
@@ -337,11 +347,11 @@
             // button_display_file
             // 
             this.button_display_file.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_display_file.Location = new System.Drawing.Point(142, 96);
+            this.button_display_file.Location = new System.Drawing.Point(126, 96);
             this.button_display_file.Name = "button_display_file";
-            this.button_display_file.Size = new System.Drawing.Size(75, 33);
+            this.button_display_file.Size = new System.Drawing.Size(91, 33);
             this.button_display_file.TabIndex = 51;
-            this.button_display_file.Text = "Display";
+            this.button_display_file.Text = "(Display)";
             this.button_display_file.UseVisualStyleBackColor = true;
             this.button_display_file.Click += new System.EventHandler(this.button_display_file_Click);
             // 
@@ -443,7 +453,7 @@
             this.button_training.Name = "button_training";
             this.button_training.Size = new System.Drawing.Size(271, 50);
             this.button_training.TabIndex = 12;
-            this.button_training.Text = "Training (Try Your Hardest in 5s)";
+            this.button_training.Text = "Train (Calibrate Your Max Strength)";
             this.button_training.UseVisualStyleBackColor = false;
             this.button_training.Click += new System.EventHandler(this.button_training_Click);
             // 
@@ -455,7 +465,7 @@
             // textBox_hitCostTime
             // 
             this.textBox_hitCostTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox_hitCostTime.Location = new System.Drawing.Point(1302, 777);
+            this.textBox_hitCostTime.Location = new System.Drawing.Point(190, 25);
             this.textBox_hitCostTime.Name = "textBox_hitCostTime";
             this.textBox_hitCostTime.Size = new System.Drawing.Size(62, 26);
             this.textBox_hitCostTime.TabIndex = 19;
@@ -464,7 +474,7 @@
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(1127, 780);
+            this.label5.Location = new System.Drawing.Point(15, 28);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(169, 20);
             this.label5.TabIndex = 53;
@@ -494,7 +504,7 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(1127, 806);
+            this.label6.Location = new System.Drawing.Point(15, 55);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(144, 20);
             this.label6.TabIndex = 56;
@@ -503,21 +513,113 @@
             // textBox_countDown
             // 
             this.textBox_countDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox_countDown.Location = new System.Drawing.Point(1302, 803);
+            this.textBox_countDown.Location = new System.Drawing.Point(190, 52);
             this.textBox_countDown.Name = "textBox_countDown";
             this.textBox_countDown.Size = new System.Drawing.Size(62, 26);
             this.textBox_countDown.TabIndex = 55;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.Location = new System.Drawing.Point(15, 82);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(104, 20);
+            this.label7.TabIndex = 58;
+            this.label7.Text = "Trials Cmpltd:";
+            // 
+            // textBox_trials
+            // 
+            this.textBox_trials.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_trials.Location = new System.Drawing.Point(122, 78);
+            this.textBox_trials.Name = "textBox_trials";
+            this.textBox_trials.Size = new System.Drawing.Size(62, 26);
+            this.textBox_trials.TabIndex = 57;
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.BackColor = System.Drawing.Color.Gainsboro;
+            this.groupBox5.Controls.Add(this.label10);
+            this.groupBox5.Controls.Add(this.textBox_hits);
+            this.groupBox5.Controls.Add(this.label9);
+            this.groupBox5.Controls.Add(this.textBox_aveTP);
+            this.groupBox5.Controls.Add(this.label8);
+            this.groupBox5.Controls.Add(this.textBox_throughput);
+            this.groupBox5.Controls.Add(this.label5);
+            this.groupBox5.Controls.Add(this.label7);
+            this.groupBox5.Controls.Add(this.textBox_hitCostTime);
+            this.groupBox5.Controls.Add(this.textBox_trials);
+            this.groupBox5.Controls.Add(this.textBox_countDown);
+            this.groupBox5.Controls.Add(this.label6);
+            this.groupBox5.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox5.Location = new System.Drawing.Point(1086, 778);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(329, 166);
+            this.groupBox5.TabIndex = 59;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Statics";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(212, 82);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(41, 20);
+            this.label10.TabIndex = 64;
+            this.label10.Text = "Hits:";
+            // 
+            // textBox_hits
+            // 
+            this.textBox_hits.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_hits.Location = new System.Drawing.Point(259, 78);
+            this.textBox_hits.Name = "textBox_hits";
+            this.textBox_hits.Size = new System.Drawing.Size(62, 26);
+            this.textBox_hits.TabIndex = 63;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.Location = new System.Drawing.Point(190, 109);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(63, 20);
+            this.label9.TabIndex = 62;
+            this.label9.Text = "Ave TP:";
+            // 
+            // textBox_aveTP
+            // 
+            this.textBox_aveTP.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_aveTP.Location = new System.Drawing.Point(259, 106);
+            this.textBox_aveTP.Name = "textBox_aveTP";
+            this.textBox_aveTP.Size = new System.Drawing.Size(62, 26);
+            this.textBox_aveTP.TabIndex = 61;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(15, 109);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(95, 20);
+            this.label8.TabIndex = 60;
+            this.label8.Text = "Throughput:";
+            // 
+            // textBox_throughput
+            // 
+            this.textBox_throughput.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_throughput.Location = new System.Drawing.Point(122, 106);
+            this.textBox_throughput.Name = "textBox_throughput";
+            this.textBox_throughput.Size = new System.Drawing.Size(62, 26);
+            this.textBox_throughput.TabIndex = 59;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1474, 837);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.textBox_countDown);
+            this.ClientSize = new System.Drawing.Size(1474, 956);
+            this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.textBox_InstructionBoard);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.textBox_hitCostTime);
             this.Controls.Add(this.button_training);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.groupBox4);
@@ -540,6 +642,8 @@
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -586,6 +690,15 @@
         private System.Windows.Forms.Timer timer_rest;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox textBox_countDown;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox textBox_trials;
+        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.TextBox textBox_throughput;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TextBox textBox_aveTP;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox textBox_hits;
     }
 }
 
