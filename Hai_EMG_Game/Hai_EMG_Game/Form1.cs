@@ -51,8 +51,7 @@ namespace Hai_EMG_Game
         int restTimeElapsed = 0;
         int timeCountDownStart = 4;//3s + Go
         int hitCounts = 0;
-        Boolean hitCountsRefresh = false;
-        double hitThreshold = 0.001; // hitThreshold of timeInterval in target area means really hit.
+        double hitThreshold = 0.2; //5*0.2=1s // 0.001; // hitThreshold of timeInterval in target area means really hit.
         Boolean isGameStart = false;
         int totalHits = 0;
         Boolean totalHitsCounted = false;
@@ -60,7 +59,7 @@ namespace Hai_EMG_Game
         Boolean isResting = false;
         int countDownTimer = 0;
         Random rnd = new Random();
-        int maxTrials = 10;
+        int maxTrials = 3;//10;
 
         //Recording and Reading
         string savingPath = "C:\\Users\\Owner\\Desktop\\Game_Data\\";
@@ -100,7 +99,7 @@ namespace Hai_EMG_Game
             electrode = "IBT";
             button_IBTVD.Enabled = false;
             button_pause.Enabled = false;
-            countDownTimer = timeInterval * 10;
+            countDownTimer = timeInterval * 1000;
         }
 
         private void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
@@ -175,6 +174,25 @@ namespace Hai_EMG_Game
                     }
 
                     counter++;
+
+
+                    if(timer_100ms.Enabled == true)
+                    {
+                        hitCostTime++; //Seems the timer is not running at 1000Hz, but 10Hz only instead. The DataReceived event is called every 1ms!!! So use this as a timer. Worked once but not anymore.
+                        countDownTimer--;
+                        if (countDownTimer == 0)
+                        {
+                            countDownTimer = timeInterval * 1000;
+                        }
+                    }
+                    if (isGameStart && center != 0 && !isResting || showBar)
+                    {
+                        if (digitizedEnvelop[counter - 1] > center - halfWidth && digitizedEnvelop[counter - 1] < center + halfWidth)
+                        {
+                            hitCounts++; //Count the accumulated time in the target area
+                        }
+                    }
+
                 }
             }
 
@@ -230,17 +248,6 @@ namespace Hai_EMG_Game
             {
                 if (isGameStart && center != 0 && !isResting || showBar)
                 {
-                    if (hitCountsRefresh) //Every time the target area updated, refresh the hitCounts.
-                    {
-                        hitCounts = 0;
-                        hitCountsRefresh = false;
-                    }
-                    if (digitizedEnvelop[counter - 1] > center - halfWidth && digitizedEnvelop[counter - 1] < center + halfWidth)
-                    {
-                        hitCounts++; //Count the accumulated time in the target area
-                    }
-
-
                     this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
                     this.chart_DigitBar.Series["targetLevel"].Points.Clear();
 
@@ -280,12 +287,12 @@ namespace Hai_EMG_Game
                         {
                             totalHits++;
                             totalHitsCounted = true;
-                            textBox_hitCostTime.Text = (hitCostTime / 10.0).ToString() + "s";
-                            hitCostTimeList.Add((hitCostTime / 10.0).ToString());
+                            textBox_hitCostTime.Text = (hitCostTime / 1000.0).ToString() + "s";
+                            hitCostTimeList.Add((hitCostTime / 1000.0).ToString());
 
                             //Calculate the throughput
                             ID = Math.Log((double)(center / (2 * halfWidth)) + 1, 2);
-                            TP = Math.Round(ID / (hitCostTime / 10), 2);
+                            TP = Math.Round(ID / (hitCostTime / 1000), 2);
                             TPList.Add(TP);
                             textBox_throughput.Text = TP.ToString();
                         }
@@ -421,7 +428,7 @@ namespace Hai_EMG_Game
                     totalTrials++;
                     textBox_trials.Text = totalTrials.ToString();
                     textBox_hits.Text = totalHits.ToString();
-                    hitCountsRefresh = true;
+                    hitCounts = 0;
                     totalHitsCounted = false;
                     hitCostTime = 0;//reset hitCostTime everytime the target bar changes
 
@@ -490,7 +497,7 @@ namespace Hai_EMG_Game
                 textBox_aveTP.Text = "";
                 textBox_aveTP.BackColor = Color.White;
                 isResting = false;
-                hitCountsRefresh = true;
+                hitCounts = 0;
 
                 textBox_InstructionBoard.Visible = true;
                 textBox_InstructionBoard.Text = "Game Starts in " + (timeCountDownStart - elapsedTime - 1) + "s";
@@ -750,14 +757,9 @@ namespace Hai_EMG_Game
 
         private void timer_100ms_Tick(object sender, EventArgs e)
         {
-            hitCostTime++; //Seems the timer is not running at 1000Hz, but 10Hz only instead. The DataReceived event is called every 1ms!!! So use this as a timer. Worked once but not anymore.
+            textBox1.Text = (hitCostTime / 1000.0).ToString()+"s";
+            textBox_countDown.Text = (countDownTimer / 1000.0).ToString() + "s";
 
-            countDownTimer--;
-            textBox_countDown.Text = Math.Round((countDownTimer / 10.0), 1).ToString() + "s";
-            if (countDownTimer == 0)
-            {
-                countDownTimer = timeInterval * 10;
-            }
         }
 
         private void timer_rest_Tick(object sender, EventArgs e)
@@ -778,7 +780,7 @@ namespace Hai_EMG_Game
                 textBox_InstructionBoard.Visible = false;
                 timer_targetLevel.Enabled = true;
                 timer_100ms.Enabled = true;
-                countDownTimer = timeInterval * 10;
+                countDownTimer = timeInterval * 1000;
                 timer_rest.Enabled = false;
                 restTimeElapsed = 0;
                 isResting = false;
