@@ -52,7 +52,7 @@ namespace Hai_EMG_Game
         int timeCountDownStart = 4;//3s + Go
         int hitCounts = 0;
         Boolean hitCountsRefresh = false;
-        double hitThreshold = 0.001; // hitThreshold of timeInterval in target area means really hit
+        double hitThreshold = 0.001; // hitThreshold of timeInterval in target area means really hit.
         Boolean isGameStart = false;
         int totalHits = 0;
         Boolean totalHitsCounted = false;
@@ -60,7 +60,7 @@ namespace Hai_EMG_Game
         Boolean isResting = false;
         int countDownTimer = 0;
         Random rnd = new Random();
-        int maxTrials = 3;//10;
+        int maxTrials = 10;
 
         //Recording and Reading
         string savingPath = "C:\\Users\\Owner\\Desktop\\Game_Data\\";
@@ -100,7 +100,7 @@ namespace Hai_EMG_Game
             electrode = "IBT";
             button_IBTVD.Enabled = false;
             button_pause.Enabled = false;
-            countDownTimer = timeInterval*10;
+            countDownTimer = timeInterval * 10;
         }
 
         private void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
@@ -174,7 +174,7 @@ namespace Hai_EMG_Game
                         myStreamWriter.WriteLine();
                     }
 
-                    counter++; 
+                    counter++;
                 }
             }
 
@@ -230,16 +230,16 @@ namespace Hai_EMG_Game
             {
                 if (isGameStart && center != 0 && !isResting || showBar)
                 {
-                        if (hitCountsRefresh) //Every time the target area updated, refresh the hitCounts.
-                        {
-                            hitCounts = 0;
-                            hitCountsRefresh = false;
-                        }
-                        if (digitizedEnvelop[counter - 1] > center - halfWidth && digitizedEnvelop[counter - 1] < center + halfWidth)
-                        {
-                            hitCounts++; //Count the accumulated time in the target area
-                        }
-                
+                    if (hitCountsRefresh) //Every time the target area updated, refresh the hitCounts.
+                    {
+                        hitCounts = 0;
+                        hitCountsRefresh = false;
+                    }
+                    if (digitizedEnvelop[counter - 1] > center - halfWidth && digitizedEnvelop[counter - 1] < center + halfWidth)
+                    {
+                        hitCounts++; //Count the accumulated time in the target area
+                    }
+
 
                     this.chart_DigitBar.Series["BarEMGVal"].Points.Clear();
                     this.chart_DigitBar.Series["targetLevel"].Points.Clear();
@@ -280,12 +280,12 @@ namespace Hai_EMG_Game
                         {
                             totalHits++;
                             totalHitsCounted = true;
-                            textBox_hitCostTime.Text = (hitCostTime/10.0).ToString() + "s";
+                            textBox_hitCostTime.Text = (hitCostTime / 10.0).ToString() + "s";
                             hitCostTimeList.Add((hitCostTime / 10.0).ToString());
 
                             //Calculate the throughput
                             ID = Math.Log((double)(center / (2 * halfWidth)) + 1, 2);
-                            TP = Math.Round(ID / (hitCostTime / 10),2);
+                            TP = Math.Round(ID / (hitCostTime / 10), 2);
                             TPList.Add(TP);
                             textBox_throughput.Text = TP.ToString();
                         }
@@ -622,10 +622,15 @@ namespace Hai_EMG_Game
             int[] wholeIntArray;
             wholeString = myStreamReader.ReadToEnd();
             wholeStringArray = wholeString.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries);
-            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 10 - hitCostTimeList.Count - TPList.Count - 1 );//Remove the last 10 elements in array by resizing, which are "Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" 
-                                                                                                                       //Remove the 10 hitCostTime values
-                                                                                                                       //Remove the 10 TPArray values
-                                                                                                                       //Remove 1 aveTP values
+            string readAveTP = wholeStringArray[wholeStringArray.Length - 1];
+            string readHit = wholeStringArray[wholeStringArray.Length - 27];
+            string readTrials = wholeStringArray[wholeStringArray.Length - 23];
+            textBox_aveTP.Text = readAveTP; textBox_aveTP.BackColor = Color.Lime;
+            textBox_hits.Text = readHit; textBox_trials.Text = readTrials;
+            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 31 );//Remove the last 10 elements in array by resizing, which are "Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" 
+                                                                            //Remove the 10 hitCostTime values
+                                                                            //Remove the 10 TPArray values
+                                                                            //Remove 1 aveTP values
             wholeIntArray = Array.ConvertAll(wholeStringArray, int.Parse);
             myStreamReader.Close();
 
@@ -748,8 +753,8 @@ namespace Hai_EMG_Game
             hitCostTime++; //Seems the timer is not running at 1000Hz, but 10Hz only instead. The DataReceived event is called every 1ms!!! So use this as a timer. Worked once but not anymore.
 
             countDownTimer--;
-            textBox_countDown.Text = Math.Round((countDownTimer/10.0),1).ToString() + "s";
-            if(countDownTimer == 0)
+            textBox_countDown.Text = Math.Round((countDownTimer / 10.0), 1).ToString() + "s";
+            if (countDownTimer == 0)
             {
                 countDownTimer = timeInterval * 10;
             }
