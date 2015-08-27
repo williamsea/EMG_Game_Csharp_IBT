@@ -51,11 +51,12 @@ namespace Hai_EMG_Game
         int restTimeElapsed = 0;
         int timeCountDownStart = 4;//3s + Go
         int hitCounts = 0;
-        double hitThreshold = 0.2; //5*0.2=1s // 0.001; // hitThreshold of timeInterval in target area means really hit.
+        double hitThreshold = 0.05;//0.1;//0.5s //0.2; //5*0.2=1s // 0.001; // hitThreshold of timeInterval in target area means really hit.
         Boolean isGameStart = false;
         int totalHits = 0;
         Boolean totalHitsCounted = false;
         int totalTrials = 0;
+        double completedRate;
         Boolean isResting = false;
         int countDownTimer = 0;
         Random rnd = new Random();
@@ -84,6 +85,7 @@ namespace Hai_EMG_Game
         double ID = 0;//Index of Difficulty
         double TP = 0;//Throughput
         double aveTP = 0;
+        double stdTP = 0;
         List<double> TPList = new List<double>();
         Boolean gameOver = true;
 
@@ -288,6 +290,7 @@ namespace Hai_EMG_Game
                             totalHits++;
                             totalHitsCounted = true;
                             textBox_hitCostTime.Text = (hitCostTime / 1000.0).ToString() + "s";
+                            textBox_hitCostTime.BackColor = Color.Lime;
                             hitCostTimeList.Add((hitCostTime / 1000.0).ToString());
 
                             //Calculate the throughput
@@ -410,6 +413,7 @@ namespace Hai_EMG_Game
                     {
                         hitCostTimeList.Add("Missed");
                         textBox_hitCostTime.Text = "Missed";
+                        textBox_hitCostTime.BackColor = Color.Tomato;
 
                         TP = 0;
                         TPList.Add(TP);
@@ -444,9 +448,6 @@ namespace Hai_EMG_Game
                 if (totalTrials == maxTrials)
                 {
                     gameOver = true;
-                    aveTP = Math.Round(TPList.Average(),2);
-                    textBox_aveTP.Text = aveTP.ToString();
-                    textBox_aveTP.BackColor = Color.Lime;
 
                     timer_targetLevel.Enabled = false;
                     timer_rest.Enabled = false;
@@ -466,13 +467,27 @@ namespace Hai_EMG_Game
                         myStreamWriter.Write(TPList[i] + "\t");
                     }
                     myStreamWriter.WriteLine();
-                    myStreamWriter.Write(aveTP);
+
+                    
+                    TPList.RemoveAll(s => s == 0);  //Remove the Misses, 0s in TPList, from TPList
+                    aveTP = Math.Round(TPList.Average(), 2);
+                    textBox_aveTP.Text = aveTP.ToString();
+                    textBox_aveTP.BackColor = Color.Lime;
+                    myStreamWriter.Write(aveTP + "\t");
+                    stdTP = TPList.StandardDeviation();
+                    textBox_stdevTP.Text = stdTP.ToString();
+                    textBox_stdevTP.BackColor = Color.Lime;
+                    myStreamWriter.Write(stdTP);
+
+                    completedRate = totalHits / totalTrials;
+                    textBox_completedRate.Text = Math.Round(completedRate, 2).ToString() ;
 
                     button_stop_recording_Click(sender, e);
                     button_StartGame.BackColor = Color.Gold;
                     timer_100ms.Enabled = false;
                     textBox_countDown.Text = "";
                     textBox_hitCostTime.Text = "";
+                    textBox_hitCostTime.BackColor = Color.White;
                     textBox_InstructionBoard.Visible = false;
 
                     showBar = true;
@@ -496,6 +511,8 @@ namespace Hai_EMG_Game
                 textBox_throughput.Text = "";
                 textBox_aveTP.Text = "";
                 textBox_aveTP.BackColor = Color.White;
+                textBox_stdevTP.Text = "";
+                textBox_stdevTP.BackColor = Color.White;
                 isResting = false;
                 hitCounts = 0;
 
@@ -629,15 +646,20 @@ namespace Hai_EMG_Game
             int[] wholeIntArray;
             wholeString = myStreamReader.ReadToEnd();
             wholeStringArray = wholeString.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries);
-            string readAveTP = wholeStringArray[wholeStringArray.Length - 1];
-            string readHit = wholeStringArray[wholeStringArray.Length - 27];
-            string readTrials = wholeStringArray[wholeStringArray.Length - 23];
-            textBox_aveTP.Text = readAveTP; textBox_aveTP.BackColor = Color.Lime;
+            string readStdTP = wholeStringArray[wholeStringArray.Length - 1];
+            string readAveTP = wholeStringArray[wholeStringArray.Length - 2];
+            string readHit = wholeStringArray[wholeStringArray.Length - 28];
+            string readTrials = wholeStringArray[wholeStringArray.Length - 24];
+            textBox_aveTP.Text = readAveTP;
+            textBox_aveTP.BackColor = Color.Lime;
+            textBox_stdevTP.Text = readStdTP;
+            textBox_stdevTP.BackColor = Color.Lime;
             textBox_hits.Text = readHit; textBox_trials.Text = readTrials;
-            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 31 );//Remove the last 10 elements in array by resizing, which are "Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" 
+            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 32 );//Remove the last 10 elements in array by resizing, which are "Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" 
                                                                             //Remove the 10 hitCostTime values
                                                                             //Remove the 10 TPArray values
-                                                                            //Remove 1 aveTP values
+                                                                            //Remove 1 aveTP value
+                                                                            //Remove 1 stdTP value
             wholeIntArray = Array.ConvertAll(wholeStringArray, int.Parse);
             myStreamReader.Close();
 
@@ -757,8 +779,9 @@ namespace Hai_EMG_Game
 
         private void timer_100ms_Tick(object sender, EventArgs e)
         {
-            textBox1.Text = (hitCostTime / 1000.0).ToString()+"s";
+            textBox_countUpTimer.Text = (hitCostTime / 1000.0).ToString()+"s";
             textBox_countDown.Text = (countDownTimer / 1000.0).ToString() + "s";
+            textBox_timeInTarget.Text = (hitCounts/1000.0).ToString()+"s";
 
         }
 
