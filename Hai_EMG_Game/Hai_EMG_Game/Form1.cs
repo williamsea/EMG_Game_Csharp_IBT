@@ -53,14 +53,16 @@ namespace Hai_EMG_Game
         int hitCounts = 0;
         double hitThreshold = 0.05;//0.1;//0.5s //0.2; //5*0.2=1s // 0.001; // hitThreshold of timeInterval in target area means really hit.
         Boolean isGameStart = false;
-        int totalHits = 0;
+        double totalHits = 0; // To calculate rate, cannot use int
         Boolean totalHitsCounted = false;
-        int totalTrials = 0;
+        double totalTrials = 0; // To calculate rate, cannot use int
         double completedRate;
         Boolean isResting = false;
         int countDownTimer = 0;
         Random rnd = new Random();
-        int maxTrials = 3;//10;
+        //int maxTrials = 3;//10;
+        List<int> pseudoRandomCentersIBT = new List<int>();
+        List<int> pseudoRandomCentersOB = new List<int>();
 
         //Recording and Reading
         string savingPath = "C:\\Users\\Owner\\Desktop\\Game_Data\\";
@@ -80,6 +82,7 @@ namespace Hai_EMG_Game
         //Time cost to hit the target
         double hitCostTime = 0;
         List<String> hitCostTimeList = new List<String>(); //The tailing extra 0s will not be counted into length
+        double reactionTime = 0;
 
         //Throughput
         double ID = 0;//Index of Difficulty
@@ -102,6 +105,7 @@ namespace Hai_EMG_Game
             button_IBTVD.Enabled = false;
             button_pause.Enabled = false;
             countDownTimer = timeInterval * 1000;
+
         }
 
         private void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
@@ -406,6 +410,7 @@ namespace Hai_EMG_Game
                 timer_100ms.Enabled = true;
 
                 textBox_InstructionBoard.Visible = false;
+
                 if ((elapsedTime - timeCountDownStart) % timeInterval == 0 && (elapsedTime - timeCountDownStart)!=0) // update every timeInterval second
                 {
                     //Handle the missed cases
@@ -420,14 +425,29 @@ namespace Hai_EMG_Game
                         textBox_throughput.Text = TP.ToString();
                     }
 
-                    if (electrode == "IBT")
+                    ////Real Random
+                    //if(electrode == "IBT")
+                    //{
+                    //    center = rnd.Next(1, 8)*10; //number from 1 to 7
+                    //}
+                    //if(electrode == "OttoBock")
+                    //{
+                    //    center = rnd.Next(1, 10)*10;//number from 1 to 9
+                    //}
+
+                    ////Pseudo Random
+                    if ( pseudoRandomCentersIBT.Count != 0)
                     {
-                        center = rnd.Next(1, 8) * 10; //number from 1 to 7
+                        if (electrode == "IBT" )
+                        {
+                            center = pseudoRandomCentersIBT.PopAt(0); //Extract the first element in the shuffled pseudo random list
+                        }
+                        if (electrode == "OttoBock" )
+                        {
+                            center = pseudoRandomCentersOB.PopAt(0);
+                        }
                     }
-                    if (electrode == "OttoBock")
-                    {
-                        center = rnd.Next(1, 10) * 10;//number from 1 to 9
-                    }
+
 
                     totalTrials++;
                     textBox_trials.Text = totalTrials.ToString();
@@ -445,7 +465,9 @@ namespace Hai_EMG_Game
                     isResting = true;
                 }
 
-                if (totalTrials == maxTrials)
+                //Check End of The Game
+                //if (totalTrials == maxTrials) // for real random
+                if (pseudoRandomCentersIBT.Count == 0 || pseudoRandomCentersOB.Count == 0) //for pseudo randome, when the pseudorandom lists are empty
                 {
                     gameOver = true;
 
@@ -457,6 +479,12 @@ namespace Hai_EMG_Game
                     button_StartGame.Enabled = true;
                     myStreamWriter.Write("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!");
                     myStreamWriter.WriteLine();
+                    completedRate = Math.Round(totalHits / totalTrials,2);
+                    textBox_completedRate.Text = Math.Round(completedRate, 2).ToString();
+                    textBox_completedRate.BackColor = Color.Lime;
+                    myStreamWriter.Write(completedRate);
+                    myStreamWriter.WriteLine();
+
                     for (int i = 0; i < hitCostTimeList.Count; i++)
                     {
                         myStreamWriter.Write(hitCostTimeList[i] + "\t");
@@ -468,19 +496,16 @@ namespace Hai_EMG_Game
                     }
                     myStreamWriter.WriteLine();
 
-                    
+
                     TPList.RemoveAll(s => s == 0);  //Remove the Misses, 0s in TPList, from TPList
                     aveTP = Math.Round(TPList.Average(), 2);
                     textBox_aveTP.Text = aveTP.ToString();
                     textBox_aveTP.BackColor = Color.Lime;
                     myStreamWriter.Write(aveTP + "\t");
-                    stdTP = TPList.StandardDeviation();
+                    stdTP = Math.Round(TPList.StandardDeviation(),2);
                     textBox_stdevTP.Text = stdTP.ToString();
                     textBox_stdevTP.BackColor = Color.Lime;
                     myStreamWriter.Write(stdTP);
-
-                    completedRate = totalHits / totalTrials;
-                    textBox_completedRate.Text = Math.Round(completedRate, 2).ToString() ;
 
                     button_stop_recording_Click(sender, e);
                     button_StartGame.BackColor = Color.Gold;
@@ -488,6 +513,11 @@ namespace Hai_EMG_Game
                     textBox_countDown.Text = "";
                     textBox_hitCostTime.Text = "";
                     textBox_hitCostTime.BackColor = Color.White;
+                    textBox_timeInTarget.Text = "";
+                    textBox_countUpTimer.Text = "";
+                    textBox_throughput.Text = "";
+
+
                     textBox_InstructionBoard.Visible = false;
 
                     showBar = true;
@@ -500,6 +530,14 @@ namespace Hai_EMG_Game
         {
             if (textBox_subjectName.Text != "")
             {
+                //Reshuffle the pseudo ramdom lists
+                pseudoRandomCentersIBT = new List<int>() { 10, 20, 30, 40, 50, 60, 70, 30, 40, 50 };
+                pseudoRandomCentersOB = new List<int>() { 10, 20, 30, 40, 50, 60, 70, 80, 90, 50 };
+                pseudoRandomCentersIBT.Shuffle();
+                pseudoRandomCentersOB.Shuffle();
+                pseudoRandomCentersIBT.Add(0); //dummy tailing 0 used to end the game with the right trial counts
+                pseudoRandomCentersOB.Add(0);
+
                 hitCostTimeList.Clear();
                 TPList.Clear();
 
@@ -509,6 +547,8 @@ namespace Hai_EMG_Game
                 textBox_trials.Text = "0";
                 textBox_hits.Text = "0";
                 textBox_throughput.Text = "";
+                textBox_completedRate.Text = "";
+                textBox_completedRate.BackColor = Color.White;
                 textBox_aveTP.Text = "";
                 textBox_aveTP.BackColor = Color.White;
                 textBox_stdevTP.Text = "";
@@ -522,13 +562,25 @@ namespace Hai_EMG_Game
                 hitCostTime = 0;//reset after game start
                 totalHits = 0;
                 totalTrials = 0; //Already including the initial one, since it actually counts from 10, 20, ... 80 to get stopped, but the real number should be 7 (10-70).
+                
+                ////Real Random
+                //if(electrode == "IBT")
+                //{
+                //    center = rnd.Next(1, 8)*10; //number from 1 to 7
+                //}
+                //if(electrode == "OttoBock")
+                //{
+                //    center = rnd.Next(1, 10)*10;//number from 1 to 9
+                //}
+
+                ////Pseudo Random
                 if(electrode == "IBT")
                 {
-                    center = rnd.Next(1, 8)*10; //number from 1 to 7
+                    center = pseudoRandomCentersIBT.PopAt(0); //Extract the first element in the shuffled pseudo random list
                 }
                 if(electrode == "OttoBock")
                 {
-                    center = rnd.Next(1, 10)*10;//number from 1 to 9
+                    center = pseudoRandomCentersOB.PopAt(0);
                 }
 
                 button_start_Click(sender, e);
@@ -648,18 +700,22 @@ namespace Hai_EMG_Game
             wholeStringArray = wholeString.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries);
             string readStdTP = wholeStringArray[wholeStringArray.Length - 1];
             string readAveTP = wholeStringArray[wholeStringArray.Length - 2];
-            string readHit = wholeStringArray[wholeStringArray.Length - 28];
-            string readTrials = wholeStringArray[wholeStringArray.Length - 24];
+            string readCmpltdRate = wholeStringArray[wholeStringArray.Length - 23];
+            string readHit = wholeStringArray[wholeStringArray.Length - 29];
+            string readTrials = wholeStringArray[wholeStringArray.Length - 25];
+            textBox_completedRate.Text = readCmpltdRate;
+            textBox_completedRate.BackColor = Color.Lime;
             textBox_aveTP.Text = readAveTP;
             textBox_aveTP.BackColor = Color.Lime;
             textBox_stdevTP.Text = readStdTP;
             textBox_stdevTP.BackColor = Color.Lime;
             textBox_hits.Text = readHit; textBox_trials.Text = readTrials;
-            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 32 );//Remove the last 10 elements in array by resizing, which are "Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" 
-                                                                            //Remove the 10 hitCostTime values
-                                                                            //Remove the 10 TPArray values
-                                                                            //Remove 1 aveTP value
-                                                                            //Remove 1 stdTP value
+            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 33 );//Remove the last 10 elements in array by resizing, which are "Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" 
+                                                                              //Remove the 10 hitCostTime values
+                                                                              //Remove the 10 TPArray values
+                                                                              //Remove 1 aveTP value
+                                                                              //Remove 1 stdTP value
+                                                                              //Remove 1 readCmpltdRate value
             wholeIntArray = Array.ConvertAll(wholeStringArray, int.Parse);
             myStreamReader.Close();
 
