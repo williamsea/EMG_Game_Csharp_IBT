@@ -81,16 +81,19 @@ namespace Hai_EMG_Game
 
         //Time cost to hit the target
         double hitCostTime = 0;
-        List<String> hitCostTimeList = new List<String>(); //The tailing extra 0s will not be counted into length
+        List<String> hitCostTimeList = new List<String>(); 
         double reactionTime = 0;
+        Boolean reactionTimeFound = false;
 
         //Throughput
         double ID = 0;//Index of Difficulty
         double TP = 0;//Throughput
         double aveTP = 0;
         double stdTP = 0;
+        double measuringTime = 0;
+        List<String> measuringTimeList = new List<String>();
         List<double> TPList = new List<double>();
-        Boolean gameOver = true;
+        Boolean trialDone = true;
 
 
         public MainForm()
@@ -184,6 +187,11 @@ namespace Hai_EMG_Game
 
                     if(timer_100ms.Enabled == true)
                     {
+                        if(envelop[counter-1]!= 0 && !reactionTimeFound) //Note it should be counter-1 to get the newest data point
+                        {
+                            reactionTime = hitCostTime;
+                            reactionTimeFound = true;
+                        }
                         hitCostTime++; //Seems the timer is not running at 1000Hz, but 10Hz only instead. The DataReceived event is called every 1ms!!! So use this as a timer. Worked once but not anymore.
                         countDownTimer--;
                         if (countDownTimer == 0)
@@ -198,6 +206,7 @@ namespace Hai_EMG_Game
                             hitCounts++; //Count the accumulated time in the target area
                         }
                     }
+
 
                 }
             }
@@ -289,7 +298,7 @@ namespace Hai_EMG_Game
                         this.chart_DigitBar.Series[1].BorderColor = Color.FromArgb(200, 0, 100, 0); //Dark Green
                         this.chart_DigitBar.Series[1].BorderWidth = 5;
 
-                        if (!totalHitsCounted && !gameOver)
+                        if (!totalHitsCounted && !trialDone)
                         {
                             totalHits++;
                             totalHitsCounted = true;
@@ -299,9 +308,13 @@ namespace Hai_EMG_Game
 
                             //Calculate the throughput
                             ID = Math.Log((double)(center / (2 * halfWidth)) + 1, 2);
-                            TP = Math.Round(ID / (hitCostTime / 1000), 2);
+                            measuringTime = (hitCostTime - reactionTime) / 1000.0;
+                            TP = Math.Round(ID / measuringTime, 2); //Reaction time deducted from measuring time
                             TPList.Add(TP);
                             textBox_throughput.Text = TP.ToString();
+                            textBox_measuringTime.Text = measuringTime.ToString() + "s";
+                            textBox_measuringTime.BackColor = Color.Lime;
+                            measuringTimeList.Add(measuringTime.ToString());
                         }
                     }
 
@@ -419,6 +432,9 @@ namespace Hai_EMG_Game
                         hitCostTimeList.Add("Missed");
                         textBox_hitCostTime.Text = "Missed";
                         textBox_hitCostTime.BackColor = Color.Tomato;
+                        measuringTimeList.Add("N/A");
+                        textBox_measuringTime.Text = "N/A";
+                        textBox_measuringTime.BackColor = Color.Tomato;
 
                         TP = 0;
                         TPList.Add(TP);
@@ -455,6 +471,10 @@ namespace Hai_EMG_Game
                     hitCounts = 0;
                     totalHitsCounted = false;
                     hitCostTime = 0;//reset hitCostTime everytime the target bar changes
+                    measuringTime = 0;
+                    reactionTime = 0;
+                    textBox_reactionTime.Text = "Waiting";
+                    reactionTimeFound = false;
 
                     //Rest stuffs handling
                     textBox_InstructionBoard.Visible = true;
@@ -469,7 +489,7 @@ namespace Hai_EMG_Game
                 //if (totalTrials == maxTrials) // for real random
                 if (pseudoRandomCentersIBT.Count == 0 || pseudoRandomCentersOB.Count == 0) //for pseudo randome, when the pseudorandom lists are empty
                 {
-                    gameOver = true;
+                    trialDone = true;
 
                     timer_targetLevel.Enabled = false;
                     timer_rest.Enabled = false;
@@ -477,19 +497,27 @@ namespace Hai_EMG_Game
                     MessageBox.Show("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!");
                     isGameStart = false;
                     button_StartGame.Enabled = true;
-                    myStreamWriter.Write("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!");
-                    myStreamWriter.WriteLine();
-                    completedRate = Math.Round(totalHits / totalTrials,2);
-                    textBox_completedRate.Text = Math.Round(completedRate, 2).ToString();
+                    completedRate = Math.Round(totalHits / totalTrials, 2);
+                    textBox_completedRate.Text = (completedRate * 100).ToString() + "%";
                     textBox_completedRate.BackColor = Color.Lime;
-                    myStreamWriter.Write(completedRate);
+                    myStreamWriter.Write("Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials! " + "Complete Rate: " + completedRate);
                     myStreamWriter.WriteLine();
 
+                    myStreamWriter.Write("HitCostTime:" + "\t");
                     for (int i = 0; i < hitCostTimeList.Count; i++)
                     {
                         myStreamWriter.Write(hitCostTimeList[i] + "\t");
                     }
                     myStreamWriter.WriteLine();
+
+                    myStreamWriter.Write("MeasuringTIme:" + "\t");
+                    for (int i = 0; i < measuringTimeList.Count; i++)
+                    {
+                        myStreamWriter.Write(measuringTimeList[i] + "\t");
+                    }
+                    myStreamWriter.WriteLine();
+
+                    myStreamWriter.Write("TP:" + "\t" + "\t");
                     for (int i = 0; i < TPList.Count; i++)
                     {
                         myStreamWriter.Write(TPList[i] + "\t");
@@ -501,11 +529,11 @@ namespace Hai_EMG_Game
                     aveTP = Math.Round(TPList.Average(), 2);
                     textBox_aveTP.Text = aveTP.ToString();
                     textBox_aveTP.BackColor = Color.Lime;
-                    myStreamWriter.Write(aveTP + "\t");
+                    myStreamWriter.Write("AverageTP: " + aveTP + "\t");
                     stdTP = Math.Round(TPList.StandardDeviation(),2);
                     textBox_stdevTP.Text = stdTP.ToString();
                     textBox_stdevTP.BackColor = Color.Lime;
-                    myStreamWriter.Write(stdTP);
+                    myStreamWriter.Write("StdevTP: "+stdTP);
 
                     button_stop_recording_Click(sender, e);
                     button_StartGame.BackColor = Color.Gold;
@@ -516,6 +544,9 @@ namespace Hai_EMG_Game
                     textBox_timeInTarget.Text = "";
                     textBox_countUpTimer.Text = "";
                     textBox_throughput.Text = "";
+                    textBox_reactionTime.Text = "";
+                    textBox_measuringTime.Text = "";
+                    textBox_measuringTime.BackColor = Color.White;
 
 
                     textBox_InstructionBoard.Visible = false;
@@ -541,7 +572,7 @@ namespace Hai_EMG_Game
                 hitCostTimeList.Clear();
                 TPList.Clear();
 
-                gameOver = false;
+                trialDone = false;
                 showBar = false;
                 elapsedTime = 0;
                 textBox_trials.Text = "0";
@@ -560,6 +591,10 @@ namespace Hai_EMG_Game
                 textBox_InstructionBoard.Text = "Game Starts in " + (timeCountDownStart - elapsedTime - 1) + "s";
                 textBox_InstructionBoard.BackColor = Color.Lime;
                 hitCostTime = 0;//reset after game start
+                measuringTime = 0;
+                reactionTime = 0;
+                textBox_reactionTime.Text = "Waiting";
+                reactionTimeFound = false;
                 totalHits = 0;
                 totalTrials = 0; //Already including the initial one, since it actually counts from 10, 20, ... 80 to get stopped, but the real number should be 7 (10-70).
                 
@@ -699,10 +734,10 @@ namespace Hai_EMG_Game
             wholeString = myStreamReader.ReadToEnd();
             wholeStringArray = wholeString.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries);
             string readStdTP = wholeStringArray[wholeStringArray.Length - 1];
-            string readAveTP = wholeStringArray[wholeStringArray.Length - 2];
-            string readCmpltdRate = wholeStringArray[wholeStringArray.Length - 23];
-            string readHit = wholeStringArray[wholeStringArray.Length - 29];
-            string readTrials = wholeStringArray[wholeStringArray.Length - 25];
+            string readAveTP = wholeStringArray[wholeStringArray.Length - 3];
+            string readCmpltdRate = wholeStringArray[wholeStringArray.Length - 38];
+            string readHit = wholeStringArray[wholeStringArray.Length - 46];
+            string readTrials = wholeStringArray[wholeStringArray.Length - 42];
             textBox_completedRate.Text = readCmpltdRate;
             textBox_completedRate.BackColor = Color.Lime;
             textBox_aveTP.Text = readAveTP;
@@ -710,12 +745,13 @@ namespace Hai_EMG_Game
             textBox_stdevTP.Text = readStdTP;
             textBox_stdevTP.BackColor = Color.Lime;
             textBox_hits.Text = readHit; textBox_trials.Text = readTrials;
-            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 33 );//Remove the last 10 elements in array by resizing, which are "Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" 
-                                                                              //Remove the 10 hitCostTime values
-                                                                              //Remove the 10 TPArray values
-                                                                              //Remove 1 aveTP value
-                                                                              //Remove 1 stdTP value
-                                                                              //Remove 1 readCmpltdRate value
+            Array.Resize(ref wholeStringArray, wholeStringArray.Length - 50 );//Remove the last 10 elements in array by resizing, which are "Game Finished! You get " + totalHits + " Hits out of " + totalTrials + " Trials!" 
+                                                                              //Remove the 11 hitCostTime values
+                                                                              //Remove the 11 Measuring time values
+                                                                              //Remove the 11 TPArray values
+                                                                              //Remove 2 aveTP value
+                                                                              //Remove 2 stdTP value
+                                                                              //Remove 3 readCmpltdRate value
             wholeIntArray = Array.ConvertAll(wholeStringArray, int.Parse);
             myStreamReader.Close();
 
@@ -838,7 +874,7 @@ namespace Hai_EMG_Game
             textBox_countUpTimer.Text = (hitCostTime / 1000.0).ToString()+"s";
             textBox_countDown.Text = (countDownTimer / 1000.0).ToString() + "s";
             textBox_timeInTarget.Text = (hitCounts/1000.0).ToString()+"s";
-
+            textBox_reactionTime.Text = (reactionTime / 1000.0).ToString() + "s";
         }
 
         private void timer_rest_Tick(object sender, EventArgs e)
