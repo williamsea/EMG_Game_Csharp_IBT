@@ -32,7 +32,8 @@ namespace Hai_EMG_Game
         int[] DACenvelop = new int[1000000];//Only for D2, 0-255
         int[] digitizedEnvelop = new int[1000000];
         int signalPeakD2 = 800;
-        double stepSizeD2 = 256.0 / 77.0; //0-255, digitizedLevel = 77; NOTE: Must add XX.0 to ensure double accuracy. Otherwise 256/77=3.
+        double stepSizeD2 = 256.0 / 100.0; //Change from 77 to 100 to make sure the trials of OB and IBT are the same
+        //double stepSizeD2 = 256.0 / 77.0; //0-255, digitizedLevel = 77; NOTE: Must add XX.0 to ensure double accuracy. Otherwise 256/77=3.
         int signalPeakOB = 1024;
         double stepSizeOB = 1024.0 / 100.0; //digitiedLevel = 100
 
@@ -268,10 +269,10 @@ namespace Hai_EMG_Game
 
                     if (electrode == "IBT")
                     {
-                        this.chart_DigitBar.ChartAreas[0].AxisY.Maximum = 80;
+                        this.chart_DigitBar.ChartAreas[0].AxisY.Maximum = 100;// 80
                         this.chart_DigitBar.ChartAreas[0].AxisY.Minimum = 0;
                         this.chart_DigitBar.ChartAreas[0].AxisY.Interval = 10;
-                        this.chart_DigitBar.Titles["Real Time Bar"].Text = "D2 Real Time Bar (0-77)";
+                        this.chart_DigitBar.Titles["Real Time Bar"].Text = "D2 Real Time Bar (0-100)";//"D2 Real Time Bar (0-77)"
                     }
                     else if (electrode == "OttoBock")
                     {
@@ -349,10 +350,10 @@ namespace Hai_EMG_Game
                     {
                         if(electrode == "IBT")
                         {
-                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 100; //80
                             this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
                             this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
-                            this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-77)";
+                            this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-100)";//"Digitized EMG Signal (0-77)"
                         }
                         else if(electrode == "OttoBock")
                         {
@@ -382,10 +383,10 @@ namespace Hai_EMG_Game
                     {
                         if (electrode == "IBT")
                         {
-                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
+                            this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 100;//80
                             this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
                             this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
-                            this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-77)";
+                            this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-100)";// "Digitized EMG Signal (0-77)"
                         }
                         else if (electrode == "OttoBock")
                         {
@@ -562,7 +563,8 @@ namespace Hai_EMG_Game
             if (textBox_subjectName.Text != "")
             {
                 //Reshuffle the pseudo ramdom lists
-                pseudoRandomCentersIBT = new List<int>() { 10, 20, 30, 40, 50, 60, 70, 30, 40, 50 };
+                //pseudoRandomCentersIBT = new List<int>() { 10, 20, 30, 40, 50, 60, 70, 30, 40, 50 };
+                pseudoRandomCentersIBT = new List<int>() { 10, 20, 30, 40, 50, 60, 70, 80, 90, 50 };
                 pseudoRandomCentersOB = new List<int>() { 10, 20, 30, 40, 50, 60, 70, 80, 90, 50 };
                 pseudoRandomCentersIBT.Shuffle();
                 pseudoRandomCentersOB.Shuffle();
@@ -571,6 +573,7 @@ namespace Hai_EMG_Game
 
                 hitCostTimeList.Clear();
                 TPList.Clear();
+                measuringTimeList.Clear();
 
                 trialDone = false;
                 showBar = false;
@@ -789,10 +792,10 @@ namespace Hai_EMG_Game
                 {
                     if(electrode == "IBT")
                     {
-                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 80;
+                        this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = 100;//80
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = 0;
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = 10;
-                        this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-77) From File";
+                        this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-100) From File";//"Digitized EMG Signal (0-77) From File";
                         this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), savedDigitizedEnvelop[disp]);
                     }
                     else

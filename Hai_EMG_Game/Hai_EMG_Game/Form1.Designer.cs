@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series10 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title7 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea8 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series11 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series12 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title8 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title1 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
             this.serialPort = new System.IO.Ports.SerialPort(this.components);
             this.button_startDisplay = new System.Windows.Forms.Button();
             this.timer_display = new System.Windows.Forms.Timer(this.components);
@@ -78,6 +78,10 @@
             this.label7 = new System.Windows.Forms.Label();
             this.textBox_trials = new System.Windows.Forms.TextBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.label16 = new System.Windows.Forms.Label();
+            this.textBox_measuringTime = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.textBox_reactionTime = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
             this.textBox_completedRate = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
@@ -93,10 +97,6 @@
             this.label8 = new System.Windows.Forms.Label();
             this.textBox_throughput = new System.Windows.Forms.TextBox();
             this.button_resetCursor = new System.Windows.Forms.Button();
-            this.label15 = new System.Windows.Forms.Label();
-            this.textBox_reactionTime = new System.Windows.Forms.TextBox();
-            this.label16 = new System.Windows.Forms.Label();
-            this.textBox_measuringTime = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.chart_EMGrealtime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart_DigitBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_displayLength)).BeginInit();
@@ -131,56 +131,56 @@
             // 
             // chart_EMGrealtime
             // 
-            chartArea7.AxisX.Title = "Time (s)";
-            chartArea7.AxisY.Title = "Envelop";
-            chartArea7.BorderWidth = 2;
-            chartArea7.CursorX.IsUserSelectionEnabled = true;
-            chartArea7.CursorY.IsUserSelectionEnabled = true;
-            chartArea7.Name = "ChartArea1";
-            this.chart_EMGrealtime.ChartAreas.Add(chartArea7);
+            chartArea1.AxisX.Title = "Time (s)";
+            chartArea1.AxisY.Title = "Envelop";
+            chartArea1.BorderWidth = 2;
+            chartArea1.CursorX.IsUserSelectionEnabled = true;
+            chartArea1.CursorY.IsUserSelectionEnabled = true;
+            chartArea1.Name = "ChartArea1";
+            this.chart_EMGrealtime.ChartAreas.Add(chartArea1);
             this.chart_EMGrealtime.Location = new System.Drawing.Point(256, 69);
             this.chart_EMGrealtime.Name = "chart_EMGrealtime";
-            series10.BorderWidth = 3;
-            series10.ChartArea = "ChartArea1";
-            series10.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series10.Name = "EMGVal";
-            this.chart_EMGrealtime.Series.Add(series10);
+            series1.BorderWidth = 3;
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series1.Name = "EMGVal";
+            this.chart_EMGrealtime.Series.Add(series1);
             this.chart_EMGrealtime.Size = new System.Drawing.Size(825, 702);
             this.chart_EMGrealtime.TabIndex = 3;
             this.chart_EMGrealtime.Text = "chart1";
-            title7.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            title7.Name = "EMG_Envelop";
-            title7.Text = "EMG Envelop";
-            this.chart_EMGrealtime.Titles.Add(title7);
+            title1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            title1.Name = "EMG_Envelop";
+            title1.Text = "EMG Envelop";
+            this.chart_EMGrealtime.Titles.Add(title1);
             // 
             // chart_DigitBar
             // 
-            chartArea8.AxisY.Interval = 10D;
-            chartArea8.AxisY.Maximum = 80D;
-            chartArea8.AxisY.Minimum = 0D;
-            chartArea8.BorderWidth = 2;
-            chartArea8.CursorX.IsUserSelectionEnabled = true;
-            chartArea8.Name = "ChartArea1";
-            this.chart_DigitBar.ChartAreas.Add(chartArea8);
+            chartArea2.AxisY.Interval = 10D;
+            chartArea2.AxisY.Maximum = 80D;
+            chartArea2.AxisY.Minimum = 0D;
+            chartArea2.BorderWidth = 2;
+            chartArea2.CursorX.IsUserSelectionEnabled = true;
+            chartArea2.Name = "ChartArea1";
+            this.chart_DigitBar.ChartAreas.Add(chartArea2);
             this.chart_DigitBar.Location = new System.Drawing.Point(1087, 69);
             this.chart_DigitBar.Name = "chart_DigitBar";
-            series11.BorderWidth = 5;
-            series11.ChartArea = "ChartArea1";
-            series11.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeColumn;
-            series11.Name = "BarEMGVal";
-            series11.YValuesPerPoint = 2;
-            series12.ChartArea = "ChartArea1";
-            series12.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeColumn;
-            series12.Name = "targetLevel";
-            series12.YValuesPerPoint = 2;
-            this.chart_DigitBar.Series.Add(series11);
-            this.chart_DigitBar.Series.Add(series12);
+            series2.BorderWidth = 5;
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeColumn;
+            series2.Name = "BarEMGVal";
+            series2.YValuesPerPoint = 2;
+            series3.ChartArea = "ChartArea1";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeColumn;
+            series3.Name = "targetLevel";
+            series3.YValuesPerPoint = 2;
+            this.chart_DigitBar.Series.Add(series2);
+            this.chart_DigitBar.Series.Add(series3);
             this.chart_DigitBar.Size = new System.Drawing.Size(328, 702);
             this.chart_DigitBar.TabIndex = 5;
-            title8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            title8.Name = "Real Time Bar";
-            title8.Text = "Real Time Bar";
-            this.chart_DigitBar.Titles.Add(title8);
+            title2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            title2.Name = "Real Time Bar";
+            title2.Text = "Real Time Bar";
+            this.chart_DigitBar.Titles.Add(title2);
             // 
             // trackBar_displayLength
             // 
@@ -190,7 +190,7 @@
             this.trackBar_displayLength.Name = "trackBar_displayLength";
             this.trackBar_displayLength.Size = new System.Drawing.Size(202, 45);
             this.trackBar_displayLength.TabIndex = 8;
-            this.trackBar_displayLength.Value = 1000;
+            this.trackBar_displayLength.Value = 10000;
             this.trackBar_displayLength.Scroll += new System.EventHandler(this.trackBar_displayLength_Scroll);
             // 
             // label_trackBar
@@ -584,6 +584,42 @@
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Statistics";
             // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label16.Location = new System.Drawing.Point(407, 54);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(129, 20);
+            this.label16.TabIndex = 76;
+            this.label16.Text = "Measuring  Time:";
+            // 
+            // textBox_measuringTime
+            // 
+            this.textBox_measuringTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_measuringTime.Location = new System.Drawing.Point(560, 50);
+            this.textBox_measuringTime.Name = "textBox_measuringTime";
+            this.textBox_measuringTime.Size = new System.Drawing.Size(62, 26);
+            this.textBox_measuringTime.TabIndex = 75;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label15.Location = new System.Drawing.Point(15, 30);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(115, 20);
+            this.label15.TabIndex = 74;
+            this.label15.Text = "Reaction Time:";
+            // 
+            // textBox_reactionTime
+            // 
+            this.textBox_reactionTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_reactionTime.Location = new System.Drawing.Point(130, 26);
+            this.textBox_reactionTime.Name = "textBox_reactionTime";
+            this.textBox_reactionTime.Size = new System.Drawing.Size(62, 26);
+            this.textBox_reactionTime.TabIndex = 73;
+            // 
             // label14
             // 
             this.label14.AutoSize = true;
@@ -720,42 +756,6 @@
             this.button_resetCursor.Text = "Reset Cursor";
             this.button_resetCursor.UseVisualStyleBackColor = true;
             this.button_resetCursor.Click += new System.EventHandler(this.button_resetCursor_Click);
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label15.Location = new System.Drawing.Point(15, 30);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(115, 20);
-            this.label15.TabIndex = 74;
-            this.label15.Text = "Reaction Time:";
-            // 
-            // textBox_reactionTime
-            // 
-            this.textBox_reactionTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox_reactionTime.Location = new System.Drawing.Point(130, 26);
-            this.textBox_reactionTime.Name = "textBox_reactionTime";
-            this.textBox_reactionTime.Size = new System.Drawing.Size(62, 26);
-            this.textBox_reactionTime.TabIndex = 73;
-            // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label16.Location = new System.Drawing.Point(407, 54);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(129, 20);
-            this.label16.TabIndex = 76;
-            this.label16.Text = "Measuring  Time:";
-            // 
-            // textBox_measuringTime
-            // 
-            this.textBox_measuringTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox_measuringTime.Location = new System.Drawing.Point(560, 50);
-            this.textBox_measuringTime.Name = "textBox_measuringTime";
-            this.textBox_measuringTime.Size = new System.Drawing.Size(62, 26);
-            this.textBox_measuringTime.TabIndex = 75;
             // 
             // MainForm
             // 
