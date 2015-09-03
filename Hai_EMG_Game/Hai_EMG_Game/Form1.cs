@@ -31,7 +31,7 @@ namespace Hai_EMG_Game
         //Version D and OB Digitization
         int[] DACenvelop = new int[1000000];//Only for D2, 0-255
         int[] digitizedEnvelop = new int[1000000];
-        int signalPeakD2 = 800;
+        int signalPeakD2 = 2000; //gain=6; //800; //gain=1
         double stepSizeD2 = 256.0 / 100.0; //Change from 77 to 100 to make sure the trials of OB and IBT are the same
         //double stepSizeD2 = 256.0 / 77.0; //0-255, digitizedLevel = 77; NOTE: Must add XX.0 to ensure double accuracy. Otherwise 256/77=3.
         int signalPeakOB = 1024;
