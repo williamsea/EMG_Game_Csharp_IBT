@@ -97,6 +97,7 @@
             this.label8 = new System.Windows.Forms.Label();
             this.textBox_throughput = new System.Windows.Forms.TextBox();
             this.button_resetCursor = new System.Windows.Forms.Button();
+            this.button_FFT = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.chart_EMGrealtime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart_DigitBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar_displayLength)).BeginInit();
@@ -757,11 +758,23 @@
             this.button_resetCursor.UseVisualStyleBackColor = true;
             this.button_resetCursor.Click += new System.EventHandler(this.button_resetCursor_Click);
             // 
+            // button_FFT
+            // 
+            this.button_FFT.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button_FFT.Location = new System.Drawing.Point(256, 829);
+            this.button_FFT.Name = "button_FFT";
+            this.button_FFT.Size = new System.Drawing.Size(168, 36);
+            this.button_FFT.TabIndex = 60;
+            this.button_FFT.Text = "Frequency Analysis";
+            this.button_FFT.UseVisualStyleBackColor = true;
+            this.button_FFT.Click += new System.EventHandler(this.button_FFT_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1474, 928);
+            this.Controls.Add(this.button_FFT);
             this.Controls.Add(this.button_resetCursor);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.textBox_InstructionBoard);
@@ -857,6 +870,7 @@
         private System.Windows.Forms.TextBox textBox_reactionTime;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.TextBox textBox_measuringTime;
+        private System.Windows.Forms.Button button_FFT;
     }
 }
 

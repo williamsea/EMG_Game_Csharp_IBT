@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extend.cs" />
+    <Compile Include="FFTclass.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

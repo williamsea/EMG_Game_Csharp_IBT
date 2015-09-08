@@ -31,7 +31,7 @@ namespace Hai_EMG_Game
         //Version D and OB Digitization
         int[] DACenvelop = new int[1000000];//Only for D2, 0-255
         int[] digitizedEnvelop = new int[1000000];
-        int signalPeakD2 = 2000; //gain=6; //800; //gain=1
+        int signalPeakD2 = 2000;//2000; //gain=6; //800; //gain=1
         double stepSizeD2 = 256.0 / 100.0; //Change from 77 to 100 to make sure the trials of OB and IBT are the same
         //double stepSizeD2 = 256.0 / 77.0; //0-255, digitizedLevel = 77; NOTE: Must add XX.0 to ensure double accuracy. Otherwise 256/77=3.
         int signalPeakOB = 1024;
@@ -155,6 +155,11 @@ namespace Hai_EMG_Game
                             combine = combine | (1 << temp);
                         }
                         envelop[counter] = combine; //Take the correct negative value. Not need to take complement and plus 1 any more.
+                    }
+
+                    if(envelop[counter] == 0)
+                    {
+                        int x = 0;
                     }
 
                     if(electrode == "IBT")
@@ -333,6 +338,12 @@ namespace Hai_EMG_Game
             }
 
             //Real Time EMG Graph
+            this.chart_EMGrealtime.ChartAreas[0].AxisX.Title = "Time (s)";
+            this.chart_EMGrealtime.ChartAreas[0].AxisY.Title = "Power (dB)";
+            this.chart_EMGrealtime.ChartAreas[0].AxisX.IsLogarithmic = false;
+            this.chart_EMGrealtime.ChartAreas[0].AxisX.MinorGrid.Enabled = false;
+
+
             this.chart_EMGrealtime.Series["EMGVal"].Points.Clear();
             if (counter >= DisplayLength)
             {
@@ -717,6 +728,9 @@ namespace Hai_EMG_Game
             if (textBox_ReadDirectory.Text != "")
             {
                 timer_display.Enabled = false;
+                button_startDisplay.Enabled = true;
+                button_pause.Enabled = false;
+
                 readingPath = textBox_ReadDirectory.Text;
                 Read_txt();
                 this.chart_EMGrealtime.ChartAreas[0].AxisX.ScaleView.ZoomReset();//Reset the manually selected cursors if there are
@@ -776,6 +790,11 @@ namespace Hai_EMG_Game
 
         private void DisplayFileData(int dispLength)
         {
+            this.chart_EMGrealtime.ChartAreas[0].AxisX.Title = "Time (s)";
+            this.chart_EMGrealtime.ChartAreas[0].AxisY.Title = "Power (dB)";
+            this.chart_EMGrealtime.ChartAreas[0].AxisX.IsLogarithmic = false;
+            this.chart_EMGrealtime.ChartAreas[0].AxisX.MinorGrid.Enabled = false;
+
             this.chart_EMGrealtime.Series["EMGVal"].Points.Clear();
             for (disp = 0; disp < dispLength; disp++)
             {
@@ -813,6 +832,8 @@ namespace Hai_EMG_Game
         private void button_return_realtime_Click(object sender, EventArgs e)
         {
             timer_display.Enabled = true;
+            button_startDisplay.Enabled = false;
+            button_pause.Enabled = true;
         }
 
         private void button_IBTVD_Click(object sender, EventArgs e)
@@ -910,6 +931,56 @@ namespace Hai_EMG_Game
         {
             this.chart_EMGrealtime.ChartAreas[0].AxisX.ScaleView.ZoomReset();//Reset the manually selected cursors if there are
             this.chart_EMGrealtime.ChartAreas[0].AxisY.ScaleView.ZoomReset();
+        }
+
+        private void button_FFT_Click(object sender, EventArgs e)
+        {
+            timer_display.Enabled = false;
+            button_startDisplay.Enabled = true;
+            button_pause.Enabled = false;
+
+            double[] dataFFT = new double[8192];
+            double[] powerSpectrum = new double[4097];
+            int length = 8192; //2^13
+            int Fs = 1000;
+            double logDisp = 0;
+
+            for(int i=counter - length; i< counter; i++)
+            {
+                dataFFT[i - counter + length] = envelop[i]; //not actually envelop here, send raw EMG data instead.
+            }
+
+            FFTclass.FFT(dataFFT, true);//FFT
+            double normFactor = length / 2 * dataFFT.Max();
+
+            for(int i=0; i<length; i++)
+            {
+                dataFFT[i] = dataFFT[i] / normFactor;
+            }
+            
+            for(int i=0; i<length/2+1; i++)
+            {
+                powerSpectrum[i] = Math.Pow(Math.Abs(dataFFT[i]), 2);
+                powerSpectrum[i] = 10 * Math.Log10(powerSpectrum[i]);
+            }
+
+            this.chart_EMGrealtime.Series["EMGVal"].Points.Clear();
+
+            this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "FFT Frequency Spectrum";
+            this.chart_EMGrealtime.ChartAreas[0].AxisX.Title = "Frequency (Hz)";
+            this.chart_EMGrealtime.ChartAreas[0].AxisY.Title = "Power (dB)";
+            this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = Double.NaN; //Default AutoScale
+            this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = Double.NaN;
+            this.chart_EMGrealtime.ChartAreas[0].AxisY.Interval = Double.NaN;
+            this.chart_EMGrealtime.ChartAreas[0].AxisX.IsLogarithmic = true;
+            this.chart_EMGrealtime.ChartAreas[0].AxisX.MinorGrid.Interval = 1;
+            this.chart_EMGrealtime.ChartAreas[0].AxisX.MinorGrid.Enabled = true;
+            for (logDisp = 1; logDisp < length/2+1; logDisp++)
+            {
+                //this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((logDisp / (length / 2 + 1) * Fs / 2).ToString(), powerSpectrum[(int)logDisp]); //If using .ToString(), X is always 0, causing error when using Log axis
+                this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY(logDisp / (length / 2 + 1) * Fs / 2, powerSpectrum[(int)logDisp]);
+                //this.chart_EMGrealtime.Series["EMGVal"].Points.AddY(powerSpectrum[(int)logDisp]);
+            }
         }
     }
 }
