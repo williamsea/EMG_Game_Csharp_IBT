@@ -23,14 +23,14 @@ namespace Hai_EMG_Game
         int firstByte;
         int secondByte;
         int thirdByte;
-        int combine;
-        bool sign = false;
+        int combine; //combine three bytes
+        bool sign = false; //the +/- sign of the combined bytes
         int[] envelop = new int[1000000];//1000s
         Encoding enc = Encoding.GetEncoding(1252);
 
         //Version D and OB Digitization
         int[] DACenvelop = new int[1000000];//Only for D2, 0-255
-        int[] digitizedEnvelop = new int[1000000];
+        int[] digitizedEnvelop = new int[1000000];//rescale the envelop from 0-signalPeak to 0-100
         int signalPeakD2 = 2000;//2000; //gain=6; //800; //gain=1
         double stepSizeD2 = 256.0 / 100.0; //Change from 77 to 100 to make sure the trials of OB and IBT are the same
         //double stepSizeD2 = 256.0 / 77.0; //0-255, digitizedLevel = 77; NOTE: Must add XX.0 to ensure double accuracy. Otherwise 256/77=3.
@@ -45,9 +45,9 @@ namespace Hai_EMG_Game
 
         //Target Levels and rest
         int elapsedTime = 0;
-        int center = 0;
-        int halfWidth = 5;
-        int timeInterval = 5;
+        int center = 0; // center of the target box
+        int halfWidth = 5; // half width of the target box
+        int timeInterval = 5; // time interval between each trial
         int timeRest = 4; //3s + Go
         int restTimeElapsed = 0;
         int timeCountDownStart = 4;//3s + Go
@@ -60,7 +60,7 @@ namespace Hai_EMG_Game
         double completedRate;
         Boolean isResting = false;
         int countDownTimer = 0;
-        Random rnd = new Random();
+        Random rnd = new Random(); //True random, not in use
         //int maxTrials = 3;//10;
         List<int> pseudoRandomCentersIBT = new List<int>();
         List<int> pseudoRandomCentersOB = new List<int>();
@@ -105,7 +105,7 @@ namespace Hai_EMG_Game
         private void Form1_Load(object sender, EventArgs e)
         {
             button_stop_recording.Enabled = false;
-            electrode = "IBT";
+            electrode = "IBT"; //default
             button_IBTVD.Enabled = false;
             button_pause.Enabled = false;
             countDownTimer = timeInterval * 1000;
@@ -155,11 +155,6 @@ namespace Hai_EMG_Game
                             combine = combine | (1 << temp);
                         }
                         envelop[counter] = combine; //Take the correct negative value. Not need to take complement and plus 1 any more.
-                    }
-
-                    if(envelop[counter] == 0)
-                    {
-                        int x = 0;
                     }
 
                     if(electrode == "IBT")
