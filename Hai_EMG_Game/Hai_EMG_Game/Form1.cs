@@ -96,6 +96,7 @@ namespace Hai_EMG_Game
         List<double> TPList = new List<double>();
         Boolean trialDone = true;
 
+        Boolean hide = true;
 
         public MainForm()
         {
@@ -976,6 +977,24 @@ namespace Hai_EMG_Game
                 this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY(logDisp / (length / 2 + 1) * Fs / 2, powerSpectrum[(int)logDisp]);
                 //this.chart_EMGrealtime.Series["EMGVal"].Points.AddY(powerSpectrum[(int)logDisp]);
             }
+        }
+
+        private void button_hideStats_Click(object sender, EventArgs e)
+        {
+            if(hide == true)
+            {
+                pictureBox_hide.Visible = true;
+                pictureBox_hide.Size = new Size(631, 145);
+                button_hideStats.Text = "Show Statistics";
+                hide = false;
+            }
+            else
+            {
+                pictureBox_hide.Visible = false;
+                button_hideStats.Text = "Hide Statistics";
+                hide = true;
+            }
+
         }
     }
 }
