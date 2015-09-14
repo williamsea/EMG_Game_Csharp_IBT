@@ -31,7 +31,7 @@ namespace Hai_EMG_Game
         //Version D and OB Digitization
         int[] DACenvelop = new int[1000000];//Only for D2, 0-255
         int[] digitizedEnvelop = new int[1000000];//rescale the envelop from 0-signalPeak to 0-100
-        int signalPeakD2 = 2000;//2000; //gain=6; //800; //gain=1
+        int signalPeakD2 = 5000;//2000; for gain=6; //800; for gain=1
         double stepSizeD2 = 256.0 / 100.0; //Change from 77 to 100 to make sure the trials of OB and IBT are the same
         //double stepSizeD2 = 256.0 / 77.0; //0-255, digitizedLevel = 77; NOTE: Must add XX.0 to ensure double accuracy. Otherwise 256/77=3.
         int signalPeakOB = 1024;
@@ -110,7 +110,6 @@ namespace Hai_EMG_Game
             button_IBTVD.Enabled = false;
             button_pause.Enabled = false;
             countDownTimer = timeInterval * 1000;
-
         }
 
         private void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
