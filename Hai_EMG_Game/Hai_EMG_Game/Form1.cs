@@ -19,11 +19,11 @@ namespace Hai_EMG_Game
     {
         //Data Acquisition and Bit Manipulation
         int counter = 0;
-        int[] receivedBuffer = new int[500];
+        int[] receivedBuffer = new int[500]; //temporary buffer stores the received data for future meaningful value extraction
         int firstByte;
         int secondByte;
         int thirdByte;
-        int combine; //combine three bytes
+        int combine; //combine three useful bytes
         bool sign = false; //the +/- sign of the combined bytes
         int[] envelop = new int[1000000];//1000s
         Encoding enc = Encoding.GetEncoding(1252);
@@ -103,6 +103,9 @@ namespace Hai_EMG_Game
             InitializeComponent();
         }
 
+        /*
+        Initialize buttons and flags once the game form is loaded
+        */
         private void Form1_Load(object sender, EventArgs e)
         {
             button_stop_recording.Enabled = false;
@@ -112,6 +115,9 @@ namespace Hai_EMG_Game
             countDownTimer = timeInterval * 1000;
         }
 
+        /*
+        This function is called everytime there is new data coming on through the Communication Port (COM2)
+        */
         private void serialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
             
@@ -164,7 +170,7 @@ namespace Hai_EMG_Game
                             DACenvelop[counter] = envelop[counter] * 255 / signalPeakD2;
                         }
                         
-                        if (DACenvelop[counter] > 255)
+                        if (DACenvelop[counter] > 255) 
                         {
                             DACenvelop[counter] = 255;
                         }
@@ -232,7 +238,9 @@ namespace Hai_EMG_Game
             return (Byte)result;
         }
 
-
+        /*
+        Start Display Button Click
+        */
         private void button_start_Click(object sender, EventArgs e)
         {
             try
@@ -248,15 +256,20 @@ namespace Hai_EMG_Game
             {
                 MessageBox.Show("Cannot Open Serial Port. Check COM Number or Availability.");
             }
-
             timer_display.Enabled = true;
         }
 
+        /*
+        Everytime timer_display ticks (every 1ms theoretically, but probably only every 100ms in reality), invoke DisplayData function
+        */
         private void timer_display_Tick(object sender, EventArgs e)
         {
             this.Invoke(new EventHandler(DisplayData));
         }
 
+        /*
+        Controls all the details of displaying EMG Data and the Game Bar in real-time
+        */
         private void DisplayData(object s, EventArgs e)
         {
             //Bar Graph
@@ -369,7 +382,6 @@ namespace Hai_EMG_Game
                             this.chart_EMGrealtime.Titles["EMG_Envelop"].Text = "Digitized EMG Signal (0-100)";
                         }
                         this.chart_EMGrealtime.Series["EMGVal"].Points.AddXY((disp / 1000).ToString(), digitizedEnvelop[disp]);
-
                     }
                 }
             }
@@ -377,7 +389,7 @@ namespace Hai_EMG_Game
             {
                 for (disp = 0; disp < DisplayLength; disp++)
                 {
-                    if (!showDigitized)
+                    if (!showDigitized) //Show Filtered EMG
                     {
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Maximum = Double.NaN;//Default AutoScale
                         this.chart_EMGrealtime.ChartAreas[0].AxisY.Minimum = Double.NaN;
@@ -407,12 +419,18 @@ namespace Hai_EMG_Game
             }
         }
 
+        /*
+        Controls the Display Length
+        */
         private void trackBar_displayLength_Scroll(object sender, EventArgs e)
         {
             DisplayLength = trackBar_displayLength.Value;
             label_trackBar.Text = "Display Length: " + (trackBar_displayLength.Value / 1000).ToString() + " s";
         }
 
+        /*
+        Controls the performance of the target box, and the instructions between trials
+        */
         private void timer_targetLevel_Tick(object sender, EventArgs e)
         {
             elapsedTime++;
@@ -471,7 +489,6 @@ namespace Hai_EMG_Game
                         }
                     }
 
-
                     totalTrials++;
                     textBox_trials.Text = totalTrials.ToString();
                     textBox_hits.Text = totalHits.ToString();
@@ -497,7 +514,6 @@ namespace Hai_EMG_Game
                 if (pseudoRandomCentersIBT.Count == 0 || pseudoRandomCentersOB.Count == 0) //for pseudo randome, when the pseudorandom lists are empty
                 {
                     trialDone = true;
-
                     timer_targetLevel.Enabled = false;
                     timer_rest.Enabled = false;
                     center = 0;
@@ -531,7 +547,6 @@ namespace Hai_EMG_Game
                     }
                     myStreamWriter.WriteLine();
 
-
                     TPList.RemoveAll(s => s == 0);  //Remove the Misses, 0s in TPList, from TPList
                     aveTP = Math.Round(TPList.Average(), 2);
                     textBox_aveTP.Text = aveTP.ToString();
@@ -554,25 +569,25 @@ namespace Hai_EMG_Game
                     textBox_reactionTime.Text = "";
                     textBox_measuringTime.Text = "";
                     textBox_measuringTime.BackColor = Color.White;
-
-
                     textBox_InstructionBoard.Visible = false;
-
                     showBar = true;
                 }
             }
             
         }
 
+        /*
+        Start Game Button Click
+        */
         private void button_StartGame_Click(object sender, EventArgs e)
         {
             if (textBox_subjectName.Text != "")
             {
                 //Reshuffle the pseudo ramdom lists
                 //pseudoRandomCentersIBT = new List<int>() { 10, 20, 30, 40, 50, 60, 70, 30, 40, 50 };
-                pseudoRandomCentersIBT = new List<int>() { 10, 20, 30, 40, 50, 60, 70, 80, 90, 50 };
+                pseudoRandomCentersIBT = new List<int>() { 10, 20, 30, 40, 50, 60, 70, 80, 90, 50 }; //List of all target box locations
                 pseudoRandomCentersOB = new List<int>() { 10, 20, 30, 40, 50, 60, 70, 80, 90, 50 };
-                pseudoRandomCentersIBT.Shuffle();
+                pseudoRandomCentersIBT.Shuffle();  // Shuffle the values in the list
                 pseudoRandomCentersOB.Shuffle();
                 pseudoRandomCentersIBT.Add(0); //dummy tailing 0 used to end the game with the right trial counts
                 pseudoRandomCentersOB.Add(0);
@@ -649,7 +664,7 @@ namespace Hai_EMG_Game
             }
             else
             {
-                button_switchGraph.Text = "Show Digitalized EMG Envelopl";
+                button_switchGraph.Text = "Show Digitalized EMG Envelop";
             }
 
             if(timer_display.Enabled == false)
@@ -919,7 +934,6 @@ namespace Hai_EMG_Game
                 restTimeElapsed = 0;
                 isResting = false;
             }
-
         }
 
         private void button_resetCursor_Click(object sender, EventArgs e)
@@ -928,7 +942,10 @@ namespace Hai_EMG_Game
             this.chart_EMGrealtime.ChartAreas[0].AxisY.ScaleView.ZoomReset();
         }
 
-        private void button_FFT_Click(object sender, EventArgs e)
+        /*
+        After clicking the Frequency Analysis button, it calcultes the FFT of the latest 8s signal and display the power spectrum in dB (y axis) and log (x axis) scale
+        */
+        private void button_FFT_Click(object sender, EventArgs e) 
         {
             timer_display.Enabled = false;
             button_startDisplay.Enabled = true;
@@ -978,6 +995,9 @@ namespace Hai_EMG_Game
             }
         }
 
+        /*
+        Hide and show statistics by clicking hideStats button
+        */
         private void button_hideStats_Click(object sender, EventArgs e)
         {
             if(hide == true)
@@ -993,7 +1013,6 @@ namespace Hai_EMG_Game
                 button_hideStats.Text = "Hide Statistics";
                 hide = true;
             }
-
         }
     }
 }
