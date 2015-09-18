@@ -655,6 +655,9 @@ namespace Hai_EMG_Game
             }
         }
 
+        /*
+        Switch between Filtered EMG Signal Graph (0-MaximunSignal) and Digitalized Envelop (0-100)
+        */
         private void button_switchGraph_Click(object sender, EventArgs e)
         {
             showDigitized = !showDigitized;
@@ -673,6 +676,9 @@ namespace Hai_EMG_Game
             }
         }
 
+        /*
+        Save data into txt file
+        */
         private void button_start_recording_Click(object sender, EventArgs e)
         {
             if (textBox_subjectName.Text != "")
@@ -718,6 +724,9 @@ namespace Hai_EMG_Game
             button_stop_recording.Enabled = false;
         }
 
+        /*
+        Select file to display
+        */
         private void button_select_file_Click(object sender, EventArgs e)
         {
             OpenFileDialog myOpenFileDialog = new OpenFileDialog();
@@ -733,6 +742,9 @@ namespace Hai_EMG_Game
             button_display_file_Click(sender, e);
         }
 
+        /*
+        Display the data file (this is called automatically, no need to click the Display button)
+        */
         private void button_display_file_Click(object sender, EventArgs e)
         {
             if (textBox_ReadDirectory.Text != "")
@@ -752,6 +764,9 @@ namespace Hai_EMG_Game
             }
         }
 
+        /*
+        Read the contents of selected data file, get rid of the statistics in the end, and save the rest in an array
+        */
         private void Read_txt()
         {
             StreamReader myStreamReader = new StreamReader(readingPath, Encoding.Default);
@@ -798,6 +813,9 @@ namespace Hai_EMG_Game
             DisplayFileData(id);
         }
 
+        /*
+        Display the file data in graph
+        */
         private void DisplayFileData(int dispLength)
         {
             this.chart_EMGrealtime.ChartAreas[0].AxisX.Title = "Time (s)";
@@ -867,6 +885,9 @@ namespace Hai_EMG_Game
             button_startDisplay.Enabled = true;
         }
 
+        /*
+        The train process is to find the maximun EMG value in 5 seconds
+        */
         private void timer_training_Tick(object sender, EventArgs e)
         {
             trainingElapsed++;
@@ -897,12 +918,15 @@ namespace Hai_EMG_Game
 
         private void button_training_Click(object sender, EventArgs e)
         {
-            button_start_Click(sender,e);
+            button_start_Click(sender,e); //Start the display if it's not started yet
             timer_training.Enabled = true;
             button_training.BackColor = Color.Cyan;
             button_training.Text = "Training: Perform Hard Flexions";
         }
 
+        /*
+        Update the statistics
+        */
         private void timer_100ms_Tick(object sender, EventArgs e)
         {
             textBox_countUpTimer.Text = (hitCostTime / 1000.0).ToString()+"s";
@@ -911,6 +935,9 @@ namespace Hai_EMG_Game
             textBox_reactionTime.Text = (reactionTime / 1000.0).ToString() + "s";
         }
 
+        /*
+        Handle the instructions during Relax
+        */
         private void timer_rest_Tick(object sender, EventArgs e)
         {
             timer_targetLevel.Enabled = false;
@@ -936,6 +963,9 @@ namespace Hai_EMG_Game
             }
         }
 
+        /*
+        Controls the display length
+        */
         private void button_resetCursor_Click(object sender, EventArgs e)
         {
             this.chart_EMGrealtime.ChartAreas[0].AxisX.ScaleView.ZoomReset();//Reset the manually selected cursors if there are
@@ -943,7 +973,9 @@ namespace Hai_EMG_Game
         }
 
         /*
-        After clicking the Frequency Analysis button, it calcultes the FFT of the latest 8s signal and display the power spectrum in dB (y axis) and log (x axis) scale
+        After clicking the Frequency Analysis button, it calcultes the FFT of the latest 8s signal and calculates the power spectrum. The power spectrum is shown in dB (y axis) and log (x axis) scale
+        The FFT can only be applied on Raw EMG signal. 
+        DO NOT apply FFT on envelops, which makes no sense and will cause problem to the program (will need to restart the program).
         */
         private void button_FFT_Click(object sender, EventArgs e) 
         {
